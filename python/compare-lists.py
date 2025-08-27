@@ -1,0 +1,36 @@
+
+#compare 2 lists and print the common elements
+def compare_lists(list1, list2):
+    return list(set(list1) & set(list2))
+
+# Example usage:
+list_a = [1, 2, 3, 4, 5]
+list_b = [4, 5, 6, 7, 8]
+print(compare_lists(list_a, list_b))  # Output: [4, 5]
+list_a = ['a', 'b', 'c']
+list_b = ['b', 'c', 'd']
+print(compare_lists(list_a, list_b))  # Output: ['b', 'c']
+list_a = [1, 2, 3]
+list_b = [4, 5, 6]
+print(compare_lists(list_a, list_b))  # Output: []
+list_a = []
+list_b = [1, 2, 3]
+print(compare_lists(list_a, list_b))  # Output: []
+list_a = [1, 2, 3]
+list_b = []
+print(compare_lists(list_a, list_b))  # Output: []
+list_a = [1, 2, 2, 3]
+list_b = [2, 2, 3, 4]
+print(compare_lists(list_a, list_b))  # Output: [2, 3]
+list_a = [None, 1, 2]
+list_b = [2, None, 3]
+print(compare_lists(list_a, list_b))  # Output: [None, 2]
+list_a = [1, 'a', None]
+list_b = [None, 'a', 3]
+print(compare_lists(list_a, list_b))  # Output: [None, 'a']
+list_a = [i for i in range(100)]
+list_b = [i for i in range(50, 150)]
+print(compare_lists(list_a, list_b))  # Output: [50, 51, 52, ..., 99]
+#list_a = [i for i in range(1000)]
+#list_b = [i for i in range(500, 1500)]
+#print(compare_lists(list_a, list_b))  # Output: [500, 501, 502, ..., 999]
