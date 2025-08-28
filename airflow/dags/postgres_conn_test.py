@@ -15,13 +15,13 @@ with DAG(
 # Task to test PostgreSQL connection by executing a simple SELECT 1 query
     test_postgres_connection = SQLExecuteQueryOperator(
         task_id='test_postgres_connection',
-        conn_id='my_postgres_conn',  # Replace with your Airflow connection ID
+        conn_id='my_postgres_conn',  # This to connect to local postgres instance
+        #conn_id = 'connect_to_avito', # Use this to connect to cloud sql postgres in GCP
         sql="SELECT NOW();",  # A simple query to test connection        
         autocommit=True,
         handler=lambda cursor: print(f"Connection successful. Server time: {cursor.fetchone()[0]}"),
     )
     
     test_postgres_connection
-
 
     print("DAG and task defined successfully.")
