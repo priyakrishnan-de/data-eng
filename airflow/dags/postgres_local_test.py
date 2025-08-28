@@ -6,13 +6,12 @@ import psycopg2
 
 def test_postgres_connection_direct(**kwargs):
     # Connection parameters (replace with your values)
-    host = "192.168.1.5" #This is local/host machine IP addr where db is running and data is inserted
-    # host = "host.docker.internal"  # Use this if using postgres running on Docker container
+    host = "host.docker.internal"  # Use this if using airflow on Docker container and postgres outside docker
     port = "5432"
     user = "postgres"
     password = "test123"
     database = "avito-context" # avito data is inserted here
-    #database = "postgres" # this database does not have any table
+    #database = "postgres" # this database does not have any table in local
 
     try:
         conn = psycopg2.connect(
