@@ -37,8 +37,8 @@ def extract_new_records():
         conn.commit()
 
         df = pd.DataFrame(rows, columns=["id","searchid","adid","position","objecttype","histctr","isclick"])
-        #df.to_csv(f"/tmp/new_records_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv", index=False, encoding='utf-8')
-        df.to_csv("/tmp/new_records_readable.csv", index=False, encoding='utf-8')
+        # this stores files inside docker worker container "/opt/airflow/tmp" folder
+        df.to_csv(f"/tmp/new_records_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv", index=False, encoding='utf-8')
         print(f"Extracted {len(rows)} new records, max id {new_max_id}")
 
     cur.close()
