@@ -3,7 +3,7 @@ This is repo where data engineering learning project code is stored.
 
 **.ssh**
 config
-Has configs to ssh to VM instances in GCP. Stopped these VM instances for now, so IP's are incorrect now. 
+Has configs to ssh to VM instances in GCP. Masked IPs. 
 
 **terraform**
 Terraform to spin up Google cloud bucket and Bigquery instance
@@ -47,12 +47,12 @@ Note: Did not use postgres instance inside docker for now - will attempt using d
 _postgres_conn_test.py_ - uses Airflow connection ID
 _postgres_local_test.py_ - Directly includes credentials, instead of IP - host.docker.internal is mentioned
 
-Step 3. Airflow - DAG created to continously produce Ad clicks & searches ie "trainsearchstream" table with objecttype/isclick logic followed. This inserts records in batches of 10 every 2 minutes when DAG is active.
+Step 3. Airflow - DAG created to continously produce Ad clicks & searches ie "trainsearchstream" table with objecttype/isclick logic followed. This inserts records in batches of 10 when DAG is active as per DAG schedule interval.
 
 _producer-simulate.py_
 
-Step 4. Airflow - DAG to continously extract data created in "trainsearchstream" since the last run ie simulated data/delta alone is extracted. This is done by having an extract marker table where the last extracted id is stored. For the first run, one record was inserted in this table with max(id) from trainsearchstream before new simulated data was inserted.  
-Data is extracted in CSV file with timestamp and file is stored in "tmp/csv_timestamp.csv" within the Airflow worker docker conatiner.
+Step 4. Airflow - DAG to continously extract data created in "trainsearchstream" since the last run ie simulated data/delta alone is extracted. This is done by having an csv extract marker table where the last extracted id is stored. 
+Data is extracted in CSV file with timestamp and file is stored in "tmp/csv_timestamp.csv" within the Airflow worker docker container.
 
 _consumer-extract-lastrun.py_
 
@@ -64,6 +64,5 @@ _docker cp <workerconatinerid>:/tmp ./airflow_tmp_
 
 (Due to volume mounting issues, did not further change mount volumes to write directly to local folder for now).
 
-Step 5. Airflow - DAG to continously extract data created in "trainsearchstream" since the last run and insert them into another staging table "trainsearchstream_staging". This is basically having same logic as previous step, except that the delta is inserted into staging table for further processing. This also uses "extract marker" table. Before running this for first time, only 1 record was retained in extract marker table in order to get all simulated records from "trainsearchstream".
-
+Step 5. Airflow - DAG to continously extract data created in "trainsearchstream" since the last run and insert them into another staging table "trainsearchstream_staging". This is basically having same logic as previous step, except that the delta is inserted into staging table for further processing. This uses "staging_extract marker" table which has a row for every delta run. 
 _trainsearchstream_delta_staging.py_
