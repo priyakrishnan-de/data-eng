@@ -15,6 +15,8 @@ def insert_records():
     last_id = cur.fetchone()[0]
 
     new_rows = []
+
+    #generate new rows
     for i in range(1,10):  # insert ~10 rows
         next_id = last_id + i
         obj_type = random.choice([1, 2, 3])
@@ -31,12 +33,14 @@ def insert_records():
             round(random.random(), 6),# histctr
             is_click
         ))
-        for row in new_rows:
-            cur.execute(
-                """INSERT INTO trainsearchstream
-                (id, searchid, adid, position, objecttype, histctr, isclick)
-                VALUES (%s,%s,%s,%s,%s,%s,%s)""", row
-            )
+    
+    #insert all records in main table 
+    for row in new_rows:
+        cur.execute(
+        """INSERT INTO trainsearchstream
+        (id, searchid, adid, position, objecttype, histctr, isclick)
+        VALUES (%s,%s,%s,%s,%s,%s,%s)""", 
+        row)
 
     conn.commit()
     cur.close()
@@ -53,7 +57,7 @@ default_args = {
 with DAG(
     "producer_simulate",
     default_args=default_args,
-    schedule_interval="*/2 * * * *",  # every 2 mins
+    schedule_interval="*/10 * * * *",  # every 10 mins
     catchup=False
 ) as dag:
 
