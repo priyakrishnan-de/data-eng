@@ -1,4 +1,4 @@
-
+import os
 from datetime import datetime, timedelta
 import pandas as pd
 from airflow import DAG
@@ -12,16 +12,23 @@ def extract_new_records():
 
     # marker table
     cur.execute("""
-    CREATE TABLE IF NOT EXISTS extract_marker (
+    CREATE TABLE IF NOT EXISTS csv_extract_marker (
         id SERIAL PRIMARY KEY,
-        last_max_id BIGINT DEFAULT 0
-    )
+        last_max_id BIGINT DEFAULT 0,
+        extract_count INTEGER DEFAULT 0
+        )
     """)
+    #create table irrespective of other queries
     conn.commit()
 
     # last extracted id
-    cur.execute("SELECT COALESCE(MAX(last_max_id), 0) FROM extract_marker")
+    cur.execute("SELECT COALESCE(MAX(last_max_id), 0) FROM csv_extract_marker")
     last_max_id = cur.fetchone()[0]
+    
+    #check if last_max_id is 0, then this is the first run - manually assign initial load value
+    last_max_id = last_max_id if last_max_id else 15961515
+    
+    print(f"last max id is: {last_max_id}")
 
     # fetch new data
     cur.execute("""
@@ -29,17 +36,28 @@ def extract_new_records():
         WHERE id > %s
         ORDER BY id ASC
     """, (last_max_id,))
+    
     rows = cur.fetchall()
 
+    if not rows:
+        print("No new rows found for CSV extraction.")
+        conn.rollback()
+        return
+
     if rows:
+        os.makedirs("/opt/airflow/tmp", exist_ok=True)
+        # this stores files inside docker worker container /opt/airflow/tmp. By default any folder will be created in root in same level as "opt".
+        filepath = f"/opt/airflow/tmp/new_records_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+   
+        df = pd.DataFrame(rows, columns=["id","searchid","adid","position","objecttype","histctr","isclick"])
+           
+        df.to_csv(filepath, index=False, encoding='utf-8')
+
         new_max_id = max(row[0] for row in rows)
-        cur.execute("INSERT INTO extract_marker (last_max_id) VALUES (%s)", (new_max_id,))
+        cur.execute("INSERT INTO csv_extract_marker (last_max_id, extract_count) VALUES (%s,%s)", (new_max_id,len(rows)))
         conn.commit()
 
-        df = pd.DataFrame(rows, columns=["id","searchid","adid","position","objecttype","histctr","isclick"])
-        # this stores files inside docker worker container "/opt/airflow/tmp" folder
-        df.to_csv(f"/tmp/new_records_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv", index=False, encoding='utf-8')
-        print(f"Extracted {len(rows)} new records, max id {new_max_id}")
+        print(f"Extracted {len(rows)} new records into {filepath} and csv last processed id is {new_max_id}")
 
     cur.close()
     conn.close()
@@ -54,7 +72,7 @@ default_args = {
 with DAG(
     "consumer_extract_lastrun",
     default_args=default_args,
-    schedule_interval="*/2 * * * *",  # every 2 mins
+    schedule_interval="*/10 * * * *",  # every 10 mins
     catchup=False
 ) as dag:
 
