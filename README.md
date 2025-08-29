@@ -64,5 +64,13 @@ _docker cp <workerconatinerid>:/tmp ./airflow_tmp_
 
 (Due to volume mounting issues, did not further change mount volumes to write directly to local folder for now).
 
-Step 5. Airflow - DAG to continously extract data created in "trainsearchstream" since the last run and insert them into another staging table "trainsearchstream_staging". This is basically having same logic as previous step, except that the delta is inserted into staging table for further processing. This uses "staging_extract marker" table which has a row for every delta run. 
-_trainsearchstream_delta_staging.py_
+Step 5. BRONZE Layer - Airflow - DAG to continously extract data created in "trainsearchstream" since the last run and insert them into another staging table "trainsearchstream_staging" with basic transformations such as de-duplication, cleansing and typecasting before inserting the records. This is considered as Bronze layer. 
+This uses "staging_extract marker" table which has a row for every delta run. 
+
+_load_delta_staging.py_
+
+Step 6. SILVER Layer - Aiflow - DAG to continously extract data in Bronze /staging table "trainsearchstream_staging" and insert them into another staging table "trainsearchstream_silver", delta is extracted based on max id already in silver table. 
+Joins: Staging table inner join with AdsInfo and SearchInfo tables.
+Enrichment:  new columns High_ctr and ad_type defined based on business logic. High_ctr = True if Histctr > 0.5, ad_type is  1: 'regular-free', 2: 'regular-highlighted', 3: 'contextual-payperclick' based on object type 1,2,3
+
+_load_delta_silver.py_
