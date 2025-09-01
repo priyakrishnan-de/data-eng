@@ -12,16 +12,16 @@ variables.tf_
 
 **Python exercises (Sreenu)**
 1. Count the number of each elements in a List
-_count-elements.py_
+_/python/count-elements.py_
 
 2. Compare 2 lists and print common elements
-_compare-lists.py_
+_/python/compare-lists.py_
 
 3. Combine 2 lists
-_combine-lists.py_
+_/python/combine-lists.py_
 
 4. Split a string of a sentence into lists of 2 words. Input: "Today is a good day to learn Python". Output: [[Today, is], [a, good], [day, to], [learn, Python]]
-_split-sen.py_
+_/python/split-sen.py_
 
    
 **Avito context Project in Local**
@@ -31,11 +31,11 @@ Instead of using only GCP capabilities as advised in confluence exercise page, I
 Step 1. This file loads 10 files from local folder to postgres tables running in local directly in python (no airflow) except trainsearchstream. File names are mapped to table names and data is inserted in respective tables in a for loop. Each of the tables are created if they do not exist and data is inserted in the most efficient way based on file size:
 There are three methods of loading data used in this file - 1) small csv files 2) large TSV files 3) large CSV files
 
-_avito-context/avito-ingestdata.py_
+_/python/avito-context/avito-ingestdata.py_
 
 Step 2. This file simulates data for trainsearchstream from testseacrhstream using python (no airflow). Both tables have same structure except additional column of "isClick" in trainseachstream (as original 7z file for trainsearchsteam is corrupted, used this script to load data). Logic followed is "Isclick" is null when objecttype is 3, else it could be 0 or 1 based on Kaggle instructions. Randomly around 5% of records inserted with isclick as 1. 
 
-_avito-context/avito-simulate-trainsearchstream.py_
+_/python/avito-context/avito-simulate-trainsearchstream.py_
 
 Now all 11 tables are loaded (All raw data ingested).
 
@@ -44,17 +44,17 @@ In order for Airflow instance to connect to local postgres (running outside dock
 Also, pg_hba.conf should have an entry which mentions IP of host machine (instead of localhost which is not recognized by docker).  
 Note: Did not use postgres instance inside docker for now - will attempt using docker postgres instance after completing this project end to end in local postgres as it is easier to navigate.
 
-_postgres_conn_test.py_ - uses Airflow connection ID
-_postgres_local_test.py_ - Directly includes credentials, instead of IP - host.docker.internal is mentioned
+_/airflow/dags/postgres_conn_test.py_ - uses Airflow connection ID
+_/airflow/dags/postgres_local_test.py_ - Directly includes credentials, instead of IP - host.docker.internal is mentioned
 
 Step 3. Airflow - DAG created to continously produce Ad clicks & searches ie "trainsearchstream" table with objecttype/isclick logic followed. This inserts records in batches of 10 when DAG is active as per DAG schedule interval.
 
-_producer-simulate.py_
+_/airflow/dags/producer-simulate.py_
 
 Step 4. Airflow - DAG to continously extract data created in "trainsearchstream" since the last run ie simulated data/delta alone is extracted. This is done by having an csv extract marker table where the last extracted id is stored. 
 Data is extracted in CSV file with timestamp and file is stored in "tmp/csv_timestamp.csv" within the Airflow worker docker container.
 
-_consumer-extract-lastrun.py_
+_/airflow/dags/consumer-extract-lastrun.py_
 
 The files can be viewed with this command:
 _Docker exec –it <containerid> bash_
@@ -67,10 +67,10 @@ _docker cp <workerconatinerid>:/tmp ./airflow_tmp_
 Step 5. BRONZE Layer - Airflow - DAG to continously extract data created in "trainsearchstream" since the last run and insert them into another staging table "trainsearchstream_staging" with basic transformations such as de-duplication, cleansing and typecasting before inserting the records. This is considered as Bronze layer. 
 This uses "staging_extract marker" table which has a row for every delta run. 
 
-_load_delta_staging.py_
+_/airflow/dags/load_delta_staging.py_
 
 Step 6. SILVER Layer - Aiflow - DAG to continously extract data in Bronze /staging table "trainsearchstream_staging" and insert them into another staging table "trainsearchstream_silver", delta is extracted based on max id already in silver table. 
 Joins: Staging table inner join with AdsInfo and SearchInfo tables.
 Enrichment:  new columns High_ctr and ad_type defined based on business logic. High_ctr = True if Histctr > 0.5, ad_type is  1: 'regular-free', 2: 'regular-highlighted', 3: 'contextual-payperclick' based on object type 1,2,3
 
-_load_delta_silver.py_
+_/airflow/dags/load_delta_silver.py_
