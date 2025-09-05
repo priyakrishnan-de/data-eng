@@ -111,9 +111,10 @@ default_args = {
 with DAG(
     "Load_delta_to_staging_and_transform",
     default_args=default_args,
-    description="Load delta into staging with basic transformation",
+    description="Load delta into bronze layer/staging with basic transformation",
     schedule_interval="*/30 * * * *",  # every 30 minutes
-    catchup=False
+    catchup=False,
+    tags=["avito-context","bronze", "staging"],
 ) as dag:
 
     load_task = PythonOperator(
