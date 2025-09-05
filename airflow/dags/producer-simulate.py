@@ -6,23 +6,24 @@ from airflow.operators.python import PythonOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 
 def insert_records():
-    hook = PostgresHook(postgres_conn_id="my_postgres_conn")
+    hook = PostgresHook(postgres_conn_id="my_postgres_conn") #For local postgres
     conn = hook.get_conn()
     cur = conn.cursor()
 
     #Get the last id and increment by 1 to keep track of the generated rows
-    cur.execute("SELECT COALESCE(MAX(id), 0) FROM trainsearchstream")
+    cur.execute("SELECT COALESCE(MAX(id), 0) FROM trainsearchstream") #For local postgres where table names are all lowercase
     last_id = cur.fetchone()[0]
 
     new_rows = []
 
     #generate new rows
-    for i in range(1,10):  # insert ~10 rows
+    # 1,2 are contextual ads with clicks, 3 is non-contextual ad with no clicks
+    for i in range(1,11):  # insert ~10 rows
         next_id = last_id + i
         obj_type = random.choice([1, 2, 3])
         is_click = None
         if obj_type in [1, 2]:
-            is_click = 1 if random.random() < 0.05 else 0
+            is_click = 1 if random.random() < 0.5 else 0 #50% of clicks for obj_type 1 and 2
         
         new_rows.append((
             next_id,   # id
@@ -55,10 +56,11 @@ default_args = {
 }
 
 with DAG(
-    "producer_simulate",
+    "Producer_simulation_trainsearchstream",
     default_args=default_args,
     schedule_interval="*/10 * * * *",  # every 10 mins
-    catchup=False
+    catchup=False,
+    tags=["avito-context","producer","data simulation"],
 ) as dag:
 
     insert_task = PythonOperator(
