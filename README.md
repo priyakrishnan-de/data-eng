@@ -10,7 +10,7 @@ Terraform to spin up Google cloud bucket and Bigquery instance
 _main.tf
 variables.tf_
 
-**Python exercises (Sreenu)**
+**Python basic exercises**
 1. Count the number of each elements in a List
 _/python/count-elements.py_
 
@@ -25,8 +25,6 @@ _/python/split-sen.py_
 
    
 **Avito context Project in Local**
-
-Instead of using only GCP capabilities as advised in confluence exercise page, I'm doing this in local first using python and local airflow.
 
 Step 1. This file loads 10 files from local folder to postgres tables running in local directly in python (no airflow) except trainsearchstream. File names are mapped to table names and data is inserted in respective tables in a for loop. Each of the tables are created if they do not exist and data is inserted in the most efficient way based on file size:
 There are three methods of loading data used in this file - 1) small csv files 2) large TSV files 3) large CSV files
@@ -62,15 +60,17 @@ _Docker exec –it <containerid> bash_
 To copy these files from docker container to local, this command can be used:
 _docker cp <workerconatinerid>:/tmp ./airflow_tmp_
 
-(Due to volume mounting issues, did not further change mount volumes to write directly to local folder for now).
-
 Step 5. BRONZE Layer - Airflow - DAG to continously extract data created in "trainsearchstream" since the last run and insert them into another staging table "trainsearchstream_staging" with basic transformations such as de-duplication, cleansing and typecasting before inserting the records. This is considered as Bronze layer. 
 This uses "staging_extract marker" table which has a row for every delta run. 
 
 _/airflow/dags/load_delta_staging.py_
 
 Step 6. SILVER Layer - Aiflow - DAG to continously extract data in Bronze /staging table "trainsearchstream_staging" and insert them into another staging table "trainsearchstream_silver", delta is extracted based on max id already in silver table. 
-Joins: Staging table inner join with AdsInfo and SearchInfo tables.
+Silver layer load query is available in Word doc:
+
 Enrichment:  new columns High_ctr and ad_type defined based on business logic. High_ctr = True if Histctr > 0.5, ad_type is  1: 'regular-free', 2: 'regular-highlighted', 3: 'contextual-payperclick' based on object type 1,2,3
 
 _/airflow/dags/load_delta_silver.py_
+
+Step 7. GOLD Layer - Airflow - DAG to continously aggregate data from silver layer and join with few other tables as necessary to create aggregate/summary tables in gold layer. This layer is not optimized and more use cases were arrived and done for practice.
+All business use cases for arriving at gold layer tables/views along with queries are available in word doc:
