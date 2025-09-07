@@ -8,23 +8,30 @@ Sample config file to ssh VM instance in GCP
 
 ## **terraform**
 Sample terraform config file to spin up Google cloud bucket and Bigquery instance
-_main.tf
-variables.tf_
+
+*main.tf*
+
+*variables.tf*
+
 
 ## **Python basic exercises**
 1. Count the number of each elements in a List
+
 _/python/count-elements.py_
 
 2. Compare 2 lists and print common elements
+
 _/python/compare-lists.py_
 
 3. Combine 2 lists
+
 _/python/combine-lists.py_
 
 4. Split a string of a sentence into lists of 2 words. Input: "Today is a good day to learn Python". Output: [[Today, is], [a, good], [day, to], [learn, Python]]
+
 _/python/split-sen.py_
 
-   
+
 # **Avito context Dataset - Data Engineering Project in Local**
 
 Step 1. This file loads 10 files from local folder to postgres tables running in local directly in python (no airflow) except trainsearchstream. File names are mapped to table names and data is inserted in respective tables in a for loop. Each of the tables are created if they do not exist and data is inserted in the most efficient way based on file size:
