@@ -67,6 +67,7 @@ _/airflow/dags/load_delta_staging.py_
 
 Step 6. SILVER Layer - Aiflow - DAG to continously extract data in Bronze /staging table "trainsearchstream_staging" and insert them into another staging table "trainsearchstream_silver", delta is extracted based on max id already in silver table. 
 Silver layer load query is available in Word doc:
+Avito Data Model Description_Silver_Gold layer queries.docx
 
 Enrichment:  new columns High_ctr and ad_type defined based on business logic. High_ctr = True if Histctr > 0.5, ad_type is  1: 'regular-free', 2: 'regular-highlighted', 3: 'contextual-payperclick' based on object type 1,2,3
 
@@ -74,3 +75,5 @@ _/airflow/dags/load_delta_silver.py_
 
 Step 7. GOLD Layer - Airflow - DAG to continously aggregate data from silver layer and join with few other tables as necessary to create aggregate/summary tables in gold layer. This layer is not optimized and more use cases were arrived and done for practice.
 All business use cases for arriving at gold layer tables/views along with queries are available in word doc:
+Avito Data Model Description_Silver_Gold layer queries.docx
+
