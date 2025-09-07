@@ -2,9 +2,9 @@
 This is repo where data engineering learning project code is stored.
 
 ## **.ssh**
-
-config
 Sample config file to ssh VM instance in GCP
+
+_config_
 
 ## **terraform**
 Sample terraform config file to spin up Google cloud bucket and Bigquery instance
@@ -68,10 +68,12 @@ Data is extracted in CSV file with timestamp and file is stored in "tmp/csv_time
 _/airflow/dags/consumer-extract-lastrun.py_
 
 The files can be viewed with this command:
-_Docker exec –it <containerid> bash_
+
+`Docker exec –it <containerid> bash`
 
 To copy these files from docker container to local, this command can be used:
-_docker cp <workerconatinerid>:/tmp ./airflow_tmp_
+
+`docker cp <workerconatinerid>:/tmp ./airflow_tmp`
 
 **Step 5. BRONZE Layer / Staging - Raw data of delta records**
 Airflow - DAG to continously extract data created in "trainsearchstream" since the last run and insert them into another staging table "trainsearchstream_staging" with basic transformations such as de-duplication, cleansing and typecasting before inserting the records. This is considered as Bronze layer. 
