@@ -1,16 +1,17 @@
-# data-eng
+# # data-eng
 This is repo where data engineering learning project code is stored.
 
-**.ssh**
-config
-Has configs to ssh to VM instances in GCP. Masked IPs. 
+## **.ssh**
 
-**terraform**
-Terraform to spin up Google cloud bucket and Bigquery instance
+config
+Sample config file to ssh VM instance in GCP
+
+## **terraform**
+Sample terraform config file to spin up Google cloud bucket and Bigquery instance
 _main.tf
 variables.tf_
 
-**Python basic exercises**
+## **Python basic exercises**
 1. Count the number of each elements in a List
 _/python/count-elements.py_
 
@@ -24,7 +25,7 @@ _/python/combine-lists.py_
 _/python/split-sen.py_
 
    
-**Avito context Project in Local**
+# **Avito context Dataset - Data Engineering Project in Local**
 
 Step 1. This file loads 10 files from local folder to postgres tables running in local directly in python (no airflow) except trainsearchstream. File names are mapped to table names and data is inserted in respective tables in a for loop. Each of the tables are created if they do not exist and data is inserted in the most efficient way based on file size:
 There are three methods of loading data used in this file - 1) small csv files 2) large TSV files 3) large CSV files
@@ -67,7 +68,7 @@ _/airflow/dags/load_delta_staging.py_
 
 Step 6. SILVER Layer - Aiflow - DAG to continously extract data in Bronze /staging table "trainsearchstream_staging" and insert them into another staging table "trainsearchstream_silver", delta is extracted based on max id already in silver table. 
 Silver layer load query is available in Word doc:
-Avito Data Model Description_Silver_Gold layer queries.docx
+[Avito Data Model Description_Silver_Gold layer queries.docx](https://github.com/priyakrishnan-de/data-eng/blob/main/Avito%20Data%20Model%20Description_Silver_Gold%20layer%20queries.docx)
 
 Enrichment:  new columns High_ctr and ad_type defined based on business logic. High_ctr = True if Histctr > 0.5, ad_type is  1: 'regular-free', 2: 'regular-highlighted', 3: 'contextual-payperclick' based on object type 1,2,3
 
@@ -75,5 +76,9 @@ _/airflow/dags/load_delta_silver.py_
 
 Step 7. GOLD Layer - Airflow - DAG to continously aggregate data from silver layer and join with few other tables as necessary to create aggregate/summary tables in gold layer. This layer is not optimized and more use cases were arrived and done for practice.
 All business use cases for arriving at gold layer tables/views along with queries are available in word doc:
-Avito Data Model Description_Silver_Gold layer queries.docx
+[Avito Data Model Description_Silver_Gold layer queries.docx](https://github.com/priyakrishnan-de/data-eng/blob/main/Avito%20Data%20Model%20Description_Silver_Gold%20layer%20queries.docx)
+
+
+# **Avito context project - Data Engineering Project in GCP**
+
 
