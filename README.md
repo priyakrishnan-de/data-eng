@@ -98,17 +98,22 @@ All business use cases for arriving at gold layer tables/views along with querie
 
 # **Avito context project - Data Engineering Project in GCP**
 
+All steps and commands followed in creation of resources and execution of pipelines/ services are documented here for reference (work in progress):
+[GCP Reference sheet](https://docs.google.com/spreadsheets/d/1a-i5N9MtxRWyhSBlCvmqUK_TV9Ea-E_V/edit?usp=sharing&ouid=117556559172603166026&rtpof=true&sd=true)
+
+This sheet also has references on using GitBash, using docker, local airflow, gcloud and terraform basics.
+
+
 **Step 1. Creation of basic resources required in GCP**
 Resources created on need basis before each step.
 Initially, bucket was created, then VM followed by Cloud SQL, Cloud Composer, Dataflow, Dataproc whenever needed, just before execution.
 
 **Step 2. Move datasets from local to GCP**
-The datasets were first uploaded to Buckets using glcoud command. Google cloud SDK was installed in local and authenticated.
+The datasets were first uploaded from local to **GCS bucket** using glcoud command. Google cloud SDK was installed in local and authenticated.
 
-GCP Resources used: GCS Bucket, 
 
 **Step 3. Ingest raw data****
-This step utilizes airflow DAG running within Cloud composer to ingest 8 large datasets from GCS bucket into Postgresql in cloud SQL. 
+This step utilizes airflow DAG running within **Cloud composer** to ingest 8 large datasets from GCS bucket into Postgresql in **Cloud SQL**. 
 DAG's were independently called in paralle as they were not dependent on each other.
 
 _gcp_dag_avito-ingestrawdata_
@@ -128,7 +133,7 @@ Both Cloud SQL and Cloud composer are attached to same "default" network and "de
 
 **Step 3. Simulation of TrainSearchStream from TestSearchStream - One time**
 
-This step of inserting simulated data into TrainSearchStream  (one time run) from TestSearchStream along with Including new column "IsClick" was done using local airflow to test the connectivity from local airflow to GCP Postgresql.
+This step of inserting simulated data into TrainSearchStream  (one time run) from TestSearchStream along with Including new column "IsClick" (based on ObjectType) was done using local airflow to test the connectivity from local airflow to GCP Postgresql.
 Two DAG's - one to create tables if they dont exist followed by insertion of new records in sequence.
 
 _gcp-localairflow-simulate-trainsearchstream.py_
@@ -140,18 +145,17 @@ Also, IP address of local was added to the allowed network in Cloud SQL instance
 
 This requires ingress firewall rule to allow connections to Cloud SQL Instance (destination - Public IP of Cloud SQL).
 
+**Step 4. Continous simulation of data into TrainSearchStream through producer/**
 
-**Step 4. Event based pipelines with Cloud Run Function**
-
-**4A. Continous simulation / insertion of data into TrainSearchStream through producer/**
-
-This step of continously simulating new data into TrainSearchStream was done using local airflow DAG connecting to Cloud SQL Postgres.
+This step of continously simulating new data into TrainSearchStream was done using local airflow DAG connecting to Cloud SQL Postgres. 
 
 _gcp-localairflow-producer-trainsearchstream_
 
-**4B. Cloud run function (Dockerised Cloud function)/**
+**Step 5. Event driven data moevment with Cloud Run Function (dockerised Cloud function) and Cloud Scheduler**
 
-Following files were created to create an application for build followed by run.
+Instead of Cloud function, went with Cloud run which packages the service into a container.
+
+Following files were created to create an application for build followed by run using **Cloud run** and **Cloud Scheduler**.
 
 _Dockerfile
 
@@ -160,7 +164,7 @@ main.py
 requirements.txt_
 
 Once the build and run is completed, Service URL is provided as an output of deploying the conatiner.
-https://<cloud run service name>-<projectnumber>.<region>.run.app
+https://<cloudrun service name>-<projectnumber>.<region>.run.app
 
 
 Once the service is availble, Scheduler is created in order to schedule the service as per required frequency.
@@ -178,7 +182,14 @@ Cloud Run function was also attached to the same netwrok "default" as Cloud SQL.
 This connector name needs to be provided in run time whle executing the python file.
 
 
+**Step 6. ETL Pipeline using Google dataflow**
 
+This dataflow pipeline identifies delta and moves the records in Avro format from source (using SQL command) to the specified target (sink) with path provided for staging, temp and templates. Transformations such as de-duplication, null handling and typecast done.
+
+_avitodelta-cloud-csv_
+
+**Step 7. ETL Pipeline using Google dataflow**
+Work In Progress
 
 
 
