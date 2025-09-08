@@ -190,6 +190,13 @@ This connector name needs to be provided in run time whle executing the python f
 
 This dataflow pipeline identifies delta and moves the records in Avro format from source (using SQL command) to the specified target (sink) with path provided for staging, temp and templates. Transformations such as de-duplication, null handling and typecast done.
 
+_delta-to-csv-pipeline.py_
+
+_setup.py_
+
+
+Name of the Dataflow pipeline: 
+
 _avitodelta-cloud-csv_
 
 **Connectivity:**
@@ -200,7 +207,7 @@ From VM, connectivity was established to Cloud SQL through private network.
 
 
 
-**Step 7. ETL Pipeline using Google dataflow**
+**Step 7. Data Transformation with Datproc and PySpark**
 Work In Progress
 
 
