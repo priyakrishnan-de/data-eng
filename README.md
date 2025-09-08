@@ -131,7 +131,8 @@ Cloud composer connects to Cloud sql using private IP of Cloud SQL.
 Both Cloud SQL and Cloud composer are attached to same "default" network and "default" subnetwork for this to work.
 
 
-**Step 3. Simulation of TrainSearchStream from TestSearchStream - One time**
+
+**Step 4A. One time Simulation of TrainSearchStream from TestSearchStream**
 
 This step of inserting simulated data into TrainSearchStream  (one time run) from TestSearchStream along with Including new column "IsClick" (based on ObjectType) was done using local airflow to test the connectivity from local airflow to GCP Postgresql.
 Two DAG's - one to create tables if they dont exist followed by insertion of new records in sequence.
@@ -145,11 +146,13 @@ Also, IP address of local was added to the allowed network in Cloud SQL instance
 
 This requires ingress firewall rule to allow connections to Cloud SQL Instance (destination - Public IP of Cloud SQL).
 
-**Step 4. Continous simulation of data into TrainSearchStream through producer/**
+
+**Step 4B. Continous simulation of data into TrainSearchStream through producer**
 
 This step of continously simulating new data into TrainSearchStream was done using local airflow DAG connecting to Cloud SQL Postgres. 
 
 _gcp-localairflow-producer-trainsearchstream_
+
 
 **Step 5. Event driven data moevment with Cloud Run Function (dockerised Cloud function) and Cloud Scheduler**
 
@@ -182,11 +185,20 @@ Cloud Run function was also attached to the same netwrok "default" as Cloud SQL.
 This connector name needs to be provided in run time whle executing the python file.
 
 
+
 **Step 6. ETL Pipeline using Google dataflow**
 
 This dataflow pipeline identifies delta and moves the records in Avro format from source (using SQL command) to the specified target (sink) with path provided for staging, temp and templates. Transformations such as de-duplication, null handling and typecast done.
 
 _avitodelta-cloud-csv_
+
+**Connectivity:**
+
+Required Cloud SQL Proxy which was done through VM.
+
+From VM, connectivity was established to Cloud SQL through private network.
+
+
 
 **Step 7. ETL Pipeline using Google dataflow**
 Work In Progress
