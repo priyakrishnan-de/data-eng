@@ -98,4 +98,91 @@ All business use cases for arriving at gold layer tables/views along with querie
 
 # **Avito context project - Data Engineering Project in GCP**
 
+**Step 1. Creation of basic resources required in GCP**
+Resources created on need basis before each step.
+Initially, bucket was created, then VM followed by Cloud SQL, Cloud Composer, Dataflow, Dataproc whenever needed, just before execution.
+
+**Step 2. Move datasets from local to GCP**
+The datasets were first uploaded to Buckets using glcoud command. Google cloud SDK was installed in local and authenticated.
+
+GCP Resources used: GCS Bucket, 
+
+**Step 3. Ingest raw data****
+This step utilizes airflow DAG running within Cloud composer to ingest 8 large datasets from GCS bucket into Postgresql in cloud SQL. 
+DAG's were independently called in paralle as they were not dependent on each other.
+
+_gcp_dag_avito-ingestrawdata_
+
+Old files which were not efficient while running in GCP Cloud composer/Airflow:
+
+_gcp_dag_avito-ingestrawdata_1
+gcp_dag_avito-ingestrawdata_2_
+
+
+**_Connectivity:_**
+
+Required private connection between Cloud SQL and Cloud composer. For Cloud SQL, both private IP and public IP was enabled.
+Cloud composer connects to Cloud sql using private IP of Cloud SQL.
+Both Cloud SQL and Cloud composer are attached to same "default" network and "default" subnetwork for this to work.
+
+
+**Step 3. Simulation of TrainSearchStream from TestSearchStream - One time**
+
+This step of inserting simulated data into TrainSearchStream  (one time run) from TestSearchStream along with Including new column "IsClick" was done using local airflow to test the connectivity from local airflow to GCP Postgresql.
+Two DAG's - one to create tables if they dont exist followed by insertion of new records in sequence.
+
+_gcp-localairflow-simulate-trainsearchstream.py_
+
+**_Connectivity:_**
+
+This required public IP of Cloud SQL to be specified in Airflow connection record in local airflow.
+Also, IP address of local was added to the allowed network in Cloud SQL instance under Network configuration.
+
+This requires ingress firewall rule to allow connections to Cloud SQL Instance (destination - Public IP of Cloud SQL).
+
+
+**Step 4. Event based pipelines with Cloud Run Function**
+
+**4A. Continous simulation / insertion of data into TrainSearchStream through producer/**
+
+This step of continously simulating new data into TrainSearchStream was done using local airflow DAG connecting to Cloud SQL Postgres.
+
+_gcp-localairflow-producer-trainsearchstream_
+
+**4B. Cloud run function (Dockerised Cloud function)/**
+
+Following files were created to create an application for build followed by run.
+
+_Dockerfile
+
+main.py
+
+requirements.txt_
+
+Once the build and run is completed, Service URL is provided as an output of deploying the conatiner.
+https://<cloud run service name>-<projectnumber>.<region>.run.app
+
+
+Once the service is availble, Scheduler is created in order to schedule the service as per required frequency.
+
+This identifies the newly inserted records (delta) and extracts them to Parquet format and stores in GCS.
+
+**Connectivity:**
+
+Private connection was established between Cloud Run function and Cloud SQL through Serverless VPC Access.
+
+Serverless VPC network was updated with unallocated subnetwork (10.x.x.x) from which IP's will be allocated. 
+
+Cloud Run function was also attached to the same netwrok "default" as Cloud SQL.
+
+This connector name needs to be provided in run time whle executing the python file.
+
+
+
+
+
+
+
+
+
 
