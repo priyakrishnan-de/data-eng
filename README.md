@@ -1,4 +1,4 @@
-<img width="1177" height="25" alt="image" src="https://github.com/user-attachments/assets/84b38105-eabe-408e-8ecf-b73868b7e70b" /># # data-eng
+# # data-eng
 This is repo where data engineering learning project code is stored.
 
 ## **.ssh**
