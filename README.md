@@ -260,10 +260,8 @@ Also, ensure current user running this command in Powershell has "DataProc Edito
 
 2. Copy the two py files to a bucket from current folder/directory
 
-`gcloud storage cp ./dataproc_bronze_to_silver.py gs://dataproc-temp-asia-east1-440170340627-ggyw9m6j/pyspark/dataproc_bronze_to_silver.py
-
-gcloud storage cp ./setup.py gs://dataproc-temp-asia-east1-440170340627-ggyw9m6j/pyspark/setup.py`
-
+`gcloud storage cp ./dataproc_bronze_to_silver.py gs://dataproc-temp-asia-east1-440170340627-ggyw9m6j/pyspark/dataproc_bronze_to_silver.py`
+`gcloud storage cp ./setup.py gs://dataproc-temp-asia-east1-440170340627-ggyw9m6j/pyspark/setup.py`
 
 3. Add Pyspark job step. In addition to earlier parameters, include new ones for workflow template and step-id for Scheduler.
    
