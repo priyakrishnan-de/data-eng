@@ -1,4 +1,4 @@
-# # data-eng
+<img width="1177" height="25" alt="image" src="https://github.com/user-attachments/assets/84b38105-eabe-408e-8ecf-b73868b7e70b" /># # data-eng
 This is repo where data engineering learning project code is stored.
 
 ## **.ssh**
@@ -34,20 +34,23 @@ _/python/split-sen.py_
 
 # **Avito context Dataset - Data Engineering Project in Local**
 
-**Step 1. Ingest raw data**
+_**Step 1. Ingest raw data**_
+
 This file loads 10 files from local folder to postgres tables running in local directly in python (no airflow) except trainsearchstream. File names are mapped to table names and data is inserted in respective tables in a for loop. Each of the tables are created if they do not exist and data is inserted in the most efficient way based on file size:
 There are three methods of loading data used in this file - 1) small csv files 2) large TSV files 3) large CSV files
 
 _/python/avito-context/avito-ingestdata.py_
 
-**Step 2.Simulate trainsearchstream data**
+_**Step 2.Simulate trainsearchstream data**_
+
 This file simulates data for trainsearchstream from testseacrhstream using python (no airflow). Both tables have same structure except additional column of "isClick" in trainseachstream (as original 7z file for trainsearchsteam is corrupted, used this script to load data). Logic followed is "Isclick" is null when objecttype is 3, else it could be 0 or 1 based on Kaggle instructions. Randomly around 5% of records inserted with isclick as 1. 
 
 _/python/avito-context/avito-simulate-trainsearchstream.py_
 
 Now all 11 tables are loaded (All raw data ingested).
 
-**Step 3. Establish connectivity from airflow to postgres**
+_**Step 3. Establish connectivity from airflow to postgres**_
+
 Establish connection from local airflow to local postgres instance, with postgres running outside docker
 In order for Airflow instance to connect to local postgres (running outside docker), host machine IP need to be used in Airflow "Connections" record. Instead of IP, host.docker.internal can be mentioned in connection record.
 Also, pg_hba.conf should have an entry which mentions IP of host machine (instead of localhost which is not recognized by docker).  
@@ -56,12 +59,14 @@ Note: Did not use postgres instance inside docker for now - will attempt using d
 _/airflow/dags/postgres_conn_test.py_ - uses Airflow connection ID
 _/airflow/dags/postgres_local_test.py_ - Directly includes credentials, instead of IP - host.docker.internal is mentioned
 
-**Step 4. Producer - Continous simulation of additional data for trainsearchstream**
+_**Step 4. Producer - Continous simulation of additional data for trainsearchstream**_
+
 Airflow - DAG created to continously produce Ad clicks & searches ie "trainsearchstream" table with objecttype/isclick logic followed. This inserts records in batches of 10 when DAG is active as per DAG schedule interval.
 
 _/airflow/dags/producer-simulate.py_
 
-**Step 5. Consumer extract to CSV - Continous extraction of new records since last run to local in CSV format**
+_**Step 5. Consumer extract to CSV - Continous extraction of new records since last run to local in CSV format**_
+
 Airflow - DAG to continously extract data created in "trainsearchstream" since the last run ie simulated data/delta alone is extracted. This is done by having an csv extract marker table where the last extracted id is stored. 
 Data is extracted in CSV file with timestamp and file is stored in "tmp/csv_timestamp.csv" within the Airflow worker docker container.
 
@@ -75,13 +80,15 @@ To copy these files from docker container to local, this command can be used:
 
 `docker cp <workerconatinerid>:/tmp ./airflow_tmp`
 
-**Step 5. BRONZE Layer / Staging - Raw data of delta records**
+_**Step 5. BRONZE Layer / Staging - Raw data of delta records**_
+
 Airflow - DAG to continously extract data created in "trainsearchstream" since the last run and insert them into another staging table "trainsearchstream_staging" with basic transformations such as de-duplication, cleansing and typecasting before inserting the records. This is considered as Bronze layer. 
 This uses "staging_extract marker" table which has a row for every delta run. 
 
 _/airflow/dags/load_delta_staging.py_
 
-**Step 6. SILVER Layer - Joins and Enrichment**
+_**Step 6. SILVER Layer - Joins and Enrichment**_
+
 Aiflow - DAG to continously extract data in Bronze /staging table "trainsearchstream_staging" and insert them into another staging table "trainsearchstream_silver", delta is extracted based on max id already in silver table. 
 Silver layer load query is available in Word doc:
 [Avito Data Model Description_Silver_Gold layer queries.docx](https://github.com/priyakrishnan-de/data-eng/blob/main/Avito%20Data%20Model%20Description_Silver_Gold%20layer%20queries.docx)
@@ -90,7 +97,8 @@ Enrichment:  new columns High_ctr and ad_type defined based on business logic. H
 
 _/airflow/dags/load_delta_silver.py_
 
-**Step 7. GOLD Layer - Aggregrations based on use cases**
+_**Step 7. GOLD Layer - Aggregrations based on use cases**_
+
 Airflow - DAG to continously aggregate data from silver layer and join with few other tables as necessary to create aggregate/summary tables in gold layer. This layer is not optimized and more use cases were arrived and done for practice.
 All business use cases for arriving at gold layer tables/views along with queries are available in word doc:
 [Avito Data Model Description_Silver_Gold layer queries.docx](https://github.com/priyakrishnan-de/data-eng/blob/main/Avito%20Data%20Model%20Description_Silver_Gold%20layer%20queries.docx)
@@ -104,15 +112,18 @@ All steps and commands followed in creation of resources and execution of pipeli
 This sheet also has references on using GitBash, using docker, local airflow, gcloud and terraform basics.
 
 
-**Step 1. Creation of basic resources required in GCP**
+_**Step 1. Creation of basic resources required in GCP**_
+
 Resources created on need basis before each step.
 Initially, bucket was created, then VM followed by Cloud SQL, Cloud Composer, Dataflow, Dataproc whenever needed, just before execution.
 
-**Step 2. Move datasets from local to GCP**
+_**Step 2. Move datasets from local to GCP**_
+
 The datasets were first uploaded from local to **GCS bucket** using glcoud command. Google cloud SDK was installed in local and authenticated.
 
 
-**Step 3. Ingest raw data****
+_**Step 3. Ingest raw data**_
+
 This step utilizes airflow DAG running within **Cloud composer** to ingest 8 large datasets from GCS bucket into Postgresql in **Cloud SQL**. 
 DAG's were independently called in paralle as they were not dependent on each other.
 
@@ -124,7 +135,7 @@ _gcp_dag_avito-ingestrawdata_1
 gcp_dag_avito-ingestrawdata_2_
 
 
-**_Connectivity:_**
+**Connectivity:**
 
 Required private connection between Cloud SQL and Cloud composer. For Cloud SQL, both private IP and public IP was enabled.
 Cloud composer connects to Cloud sql using private IP of Cloud SQL.
@@ -132,14 +143,14 @@ Both Cloud SQL and Cloud composer are attached to same "default" network and "de
 
 
 
-**Step 4A. One time Simulation of TrainSearchStream from TestSearchStream**
+_**Step 4A. One time Simulation of TrainSearchStream from TestSearchStream**_
 
 This step of inserting simulated data into TrainSearchStream  (one time run) from TestSearchStream along with Including new column "IsClick" (based on ObjectType) was done using local airflow to test the connectivity from local airflow to GCP Postgresql.
 Two DAG's - one to create tables if they dont exist followed by insertion of new records in sequence.
 
 _gcp-localairflow-simulate-trainsearchstream.py_
 
-**_Connectivity:_**
+**Connectivity:**
 
 This required public IP of Cloud SQL to be specified in Airflow connection record in local airflow.
 Also, IP address of local was added to the allowed network in Cloud SQL instance under Network configuration.
@@ -147,14 +158,14 @@ Also, IP address of local was added to the allowed network in Cloud SQL instance
 This requires ingress firewall rule to allow connections to Cloud SQL Instance (destination - Public IP of Cloud SQL).
 
 
-**Step 4B. Continous simulation of data into TrainSearchStream through producer**
+_**Step 4B. Continous simulation of data into TrainSearchStream through producer**_
 
 This step of continously simulating new data into TrainSearchStream was done using local airflow DAG connecting to Cloud SQL Postgres. 
 
 _gcp-localairflow-producer-trainsearchstream_
 
 
-**Step 5. Event driven data moevment with Cloud Run Function (dockerised Cloud function) and Cloud Scheduler**
+_**Step 5. Event driven data moevment with Cloud Run Function (dockerised Cloud function) and Cloud Scheduler**_
 
 Instead of Cloud function, went with Cloud run which packages the service into a container.
 
@@ -186,7 +197,7 @@ This connector name needs to be provided in run time whle executing the python f
 
 
 
-**Step 6. ETL Pipeline using Google dataflow**
+_**Step 6. ETL Pipeline using Google dataflow**_
 
 This dataflow pipeline identifies delta and moves the records in Avro format from source (using SQL command) to the specified target (sink) with path provided for staging, temp and templates. Transformations such as de-duplication, null handling and typecast done.
 
@@ -207,11 +218,126 @@ From VM, connectivity was established to Cloud SQL through private network.
 
 
 
-**Step 7. Data Transformation with Datproc and PySpark**
-Work In Progress
+_**Step 7. Data Transformation with Datproc and PySpark**_
+
+1. Created Dataproc cluster with command, GCP creates default service account automatically. Ensure this GCP service account is provided "DatProc Editor" role.
+Also, ensure current user running this command in Powershell has "DataProc Editor" role. Atleast should have "DataProc Job User" + "DataProc Job Viewer".
 
 
+`gcloud dataproc clusters create avito-pyspark-cluster \ --region=asia-east1 \ --zone=asia-east1-a \ --network=default \ --enable-component-gateway \ --master-machine-type=n1-standard-4 \ --worker-machine-type=n1-standard-4 \ --num-workers=2 \ --image-version=2.1-debian11`
 
+
+2. Create pyspark file with the logic and setup.py file.
+
+   _dataproc_bronze_to_silver.py_
+
+   Has logic to left join brnoze table with SearchInfo and AdsInfo and also with category and location table. New columns for high_ctr was added for enrinchment.
+   This wil replace the current data in silver table.
+
+   _setup.py_
+
+   Has dependencies for pandas, numpy
+
+4. Downloaded the latest JDBC driver "postgresql-42.7.6.jar " and uploaded it to the default bucket created by dataproc. The pasth for JAR has to be specified while running the pyspark job.
+
+
+5. Run the pyspark job using this command to test the pyspark. Have to add cluster (using existing cluster), region, path to setup file. Also added properties for hearbeatinterval and timeout due to the long time it takes to run this job. Database variables are hardcoded in the job.
+
+   `gcloud dataproc jobs submit pyspark \
+    --cluster="avito-pyspark-cluster" \
+    --region="asia-east1" \
+    --py-files=./setup.py \
+    --jars=gs://dataproc-staging-asia-east1-440170340627-rrk2ibyt/postgresql-42.7.6.jar \
+    ./dataproc_bronze_to_silver.py \
+    --properties=spark.executor.heartbeatInterval=300000ms,spark.network.timeout=600000ms`
+
+
+**Schedule the DataProc PySpark with Workflow Template and Cloud scheduler**
+
+1. Create a workflow Template, same region and cluster (if any), else default cluster will be created and destroyed.
+
+`gcloud dataproc workflow-templates create avito-silver-wf  --region=asia-east1`
+
+2. Copy the two py files to a bucket from current folder/directory
+
+`gcloud storage cp ./dataproc_bronze_to_silver.py gs://dataproc-temp-asia-east1-440170340627-ggyw9m6j/pyspark/dataproc_bronze_to_silver.py
+
+gcloud storage cp ./setup.py gs://dataproc-temp-asia-east1-440170340627-ggyw9m6j/pyspark/setup.py`
+
+
+3. Add Pyspark job step. In addition to earlier parameters, include new ones for workflow template and step-id for Scheduler.
+   
+`gcloud dataproc workflow-templates add-job pyspark gs://dataproc-temp-asia-east1-440170340627-ggyw9m6j/pyspark/dataproc_bronze_to_silver.py \
+  --step-id=bronze-to-silver-step \
+  --workflow-template=avito-silver-wf \
+  --region=asia-east1 \
+  --py-files=gs://dataproc-temp-asia-east1-440170340627-ggyw9m6j/pyspark/setup.py \
+  --jars=gs://dataproc-staging-asia-east1-440170340627-rrk2ibyt/postgresql-42.7.6.jar \
+  --properties=spark.executor.heartbeatInterval=300000ms,spark.network.timeout=600000ms`
+
+
+4. Ensure to provide default compute Service account these roles first
+
+Data Proc Worker
+Storage Object Viewer
+
+5. Service Accunts > Go to the Compute service account
+
+Click Grant Access > Select user who is running the command and provide "Service Account Token Creator" against Service Account for impersonation.
+
+6. Enable API for impersonation
+
+gcloud services enable iamcredentials.googleapis.com
+
+7. Set cluster for Workflow template, if not done while creation. (reusing existing cluster).
+
+`gcloud dataproc workflow-templates set-managed-cluster avito-silver-wf \
+  --region=asia-east1 \
+  --cluster-name=bronze-to-silver-temp \
+  --num-workers=2 \
+  --master-machine-type=n1-standard-4 \
+  --worker-machine-type=n1-standard-4`
+
+
+8. Restart this workflow any time, need to use Service account to run it from powershell.
+
+`gcloud dataproc workflow-templates instantiate avito-silver-wf \
+  --region=asia-east1 \
+  --impersonate-service-account=440170340627-compute@developer.gserviceaccount.com \`
+
+
+9. Set up Cloud Scheduler to run on a scheduled basis
+
+    `gcloud scheduler jobs create http bronze-to-silver-job \
+  --schedule="0 2 * * *" \
+  --uri="https://dataproc.googleapis.com/v1/projects/key-petal-471015-g3/regions/asia-east1/workflowTemplates/avito-silver-wf:instantiate" \
+  --http-method=POST \
+  --oidc-service-account-email=440170340627-compute@developer.gserviceaccount.com  \
+  --oidc-token-audience="https://dataproc.googleapis.com/" \
+  --time-zone="Asia/Kolkata" \
+  --location=asia-east1`
+
+
+10. After the job is scheduled, can be verified by following commands.
+
+  View All scheduled Jobs
+
+  `gcloud scheduler jobs list --location=asia-east1 --project=key-petal-471015-g3`
+
+  View details of a specific job
+
+  `gcloud scheduler jobs describe bronze-to-silver-job \
+  --location=asia-east1 \
+  --project=key-petal-471015-g3`
+
+  
+   
+11. To run the scheduler manully for testing from Powershell.
+
+    `gcloud scheduler jobs run bronze-to-silver-job \
+  --location=asia-east1 \
+  --project=key-petal-471015-g3`
+   
 
 
 
