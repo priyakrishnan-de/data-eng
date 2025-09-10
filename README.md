@@ -341,6 +341,7 @@ gcloud services enable iamcredentials.googleapis.com
 
 _**Step 8. Aggregation tables created in GOLD LAYER in Cloud SQL + Gold layer data stored as CSV files in GCS Bucket**_
 
+
 Follow same steps as for Step 7.
 
 1. pyspark file for Gold layer performs both the actions of aggregationg tables for gold layer in Cloud SQL as well as storing the same data in GCS Bucket with time stamp.
@@ -380,7 +381,8 @@ This table along with rest of the RAW DATA tables (except TestSearchStream/Train
 SILVER Layer: "TrainSeacrchStream_staging" is joined with "SearchInfo", "AdsInfo", "Location", "Category",  new columns added to load to **"TrainSearchstream_Silver"**.
 Data is truncated and inseretd every time. This is done through Cloud scheduler job which calls Dataproc Workflow template.
 
-GOLD Layer: "TrainSearchStream_Silver" is aggregated and based on use case, data from "PhoneSearchStream", "VisitsStream" is also aggregated to store in various gold tables or gold views as applicable.
+GOLD Layer: "TrainSearchStream_Silver" is aggregated and based on use case, data from "PhoneSearchStream", "VisitsStream" is also aggregated to store in various gold tables or gold views as applicable. 
+Data is truncated and inseretd every time. This is done through Cloud scheduler job which calls Dataproc Workflow template.
 
 All gold layer tables and views can be viewed in this doc:
 
