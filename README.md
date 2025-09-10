@@ -158,7 +158,7 @@ Also, IP address of local was added to the allowed network in Cloud SQL instance
 This requires ingress firewall rule to allow connections to Cloud SQL Instance (destination - Public IP of Cloud SQL).
 
 
-_**Step 4B. Continous simulation of data into TrainSearchStream through producer**_
+_**Step 4B. Continous simulation of data into TrainSearchStream through producer in BRONZE layer**_
 
 This step of continously simulating new data into TrainSearchStream was done using local airflow DAG connecting to Cloud SQL Postgres. 
 
@@ -218,7 +218,7 @@ From VM, connectivity was established to Cloud SQL through private network.
 
 
 
-_**Step 7. Data Transformation with Datproc and PySpark**_
+_**Step 7. Data Transformation with Datproc and PySpark into SILVER LAYER Cloud SQL**_
 
 1. Created Dataproc cluster with command, GCP creates default service account automatically. Ensure this GCP service account is provided "DatProc Editor" role.
 Also, ensure current user running this command in Powershell has "DataProc Editor" role. Atleast should have "DataProc Job User" + "DataProc Job Viewer".
@@ -339,4 +339,29 @@ gcloud services enable iamcredentials.googleapis.com
    
 
 
+_**Step 8. Aggergration tables created in GOLD LAYER in Cloud SQL + Gold layer data stored as CSV filesin GCS Bucket**_
+
+Follow same steps as for Step 7.
+
+1. pyspark file for Gold layer performs both the actions of aggergationg tables for gold layer in Cloud SQL as well as storeing the same data in GCS Bucket.
+
+_dataproc_silver_gold_csv.py_
+
+
+2. pyspark file which only loads tables into Gold Layer SQL Table (does not write to GCS Bucket)
+
+_dataproc_silver_gold.py_
+
+
+Workflow for Gold: 
+
+_avito-gold-wf_
+
+Workflow Step ID:
+
+_silver_to_gold_step_
+
+Cloud Scheduler for Gold:
+
+_silver-to-gold.py_
 
