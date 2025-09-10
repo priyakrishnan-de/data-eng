@@ -339,11 +339,11 @@ gcloud services enable iamcredentials.googleapis.com
    
 
 
-_**Step 8. Aggergration tables created in GOLD LAYER in Cloud SQL + Gold layer data stored as CSV filesin GCS Bucket**_
+_**Step 8. Aggregation tables created in GOLD LAYER in Cloud SQL + Gold layer data stored as CSV files in GCS Bucket**_
 
 Follow same steps as for Step 7.
 
-1. pyspark file for Gold layer performs both the actions of aggergationg tables for gold layer in Cloud SQL as well as storeing the same data in GCS Bucket.
+1. pyspark file for Gold layer performs both the actions of aggregationg tables for gold layer in Cloud SQL as well as storing the same data in GCS Bucket with time stamp.
 
 _dataproc_silver_gold_csv.py_
 
@@ -364,4 +364,30 @@ _silver_to_gold_step_
 Cloud Scheduler for Gold:
 
 _silver-to-gold.py_
+
+
+_**Step 9. Medallion Architecture**_
+
+Raw data: All tables ingested
+
+One time Simulated data: TrainSearchstream (from TestSearchstream)
+
+Continous Simulation of 10 new records every 10 minutes into TrainSearchstream through Cloud Composer/Airflow
+
+BRONZE Layer: New records inserted into "TrainSearchstream" is moved to "TrainSearchStream_Staging" continously every 30 minutes through Cloud Composer/Airflow. 
+This table along with rest of the RAW DATA tables (except TestSearchStream/TrainSearchStream) considered as BRONZE layer.
+
+SILVER Layer: "TrainSeacrchStream_staging" is joined with "SearchInfo", "AdsInfo", "Location", "Category",  new columns added to load to "TrainSearchstream_Silver".
+Data is truncated and inseretd every time. This is done through Cloud scheduler job which calls Dataproc Workflow template.
+
+GOLD Layer: "TrainSearchStream_Silver" is aggregated and based on use case, data from "PhoneSearchStream", "VisitsStream" is also aggregated to store in various gold tables or gold views as applicable.
+
+All gold layer tables and views can be viewed in this doc:
+
+[Avito Data Model Description_Silver_Gold layer queries.docx](https://github.com/priyakrishnan-de/data-eng/blob/main/Avito%20Data%20Model%20Description_Silver_Gold%20layer%20queries.docx)
+
+
+_**Step 10.Data Visualization with Google Data Studio / Looker**_
+
+WIP
 
