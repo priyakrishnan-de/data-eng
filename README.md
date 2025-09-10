@@ -374,10 +374,10 @@ One time Simulated data: TrainSearchstream (from TestSearchstream)
 
 Continous Simulation of 10 new records every 10 minutes into TrainSearchstream through Cloud Composer/Airflow
 
-BRONZE Layer: New records inserted into "TrainSearchstream" is moved to "TrainSearchStream_Staging" continously every 30 minutes through Cloud Composer/Airflow. 
+BRONZE Layer: New records inserted into "TrainSearchstream" is moved to **"TrainSearchStream_Staging"** continously every 30 minutes through Cloud Composer/Airflow. 
 This table along with rest of the RAW DATA tables (except TestSearchStream/TrainSearchStream) considered as BRONZE layer.
 
-SILVER Layer: "TrainSeacrchStream_staging" is joined with "SearchInfo", "AdsInfo", "Location", "Category",  new columns added to load to "TrainSearchstream_Silver".
+SILVER Layer: "TrainSeacrchStream_staging" is joined with "SearchInfo", "AdsInfo", "Location", "Category",  new columns added to load to **"TrainSearchstream_Silver"**.
 Data is truncated and inseretd every time. This is done through Cloud scheduler job which calls Dataproc Workflow template.
 
 GOLD Layer: "TrainSearchStream_Silver" is aggregated and based on use case, data from "PhoneSearchStream", "VisitsStream" is also aggregated to store in various gold tables or gold views as applicable.
