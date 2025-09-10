@@ -247,7 +247,7 @@ Also, ensure current user running this command in Powershell has "DataProc Edito
     --cluster="avito-pyspark-cluster" \
     --region="asia-east1" \
     --py-files=./setup.py \
-    --jars=gs://dataproc-staging-asia-east1-440170340627-rrk2ibyt/postgresql-42.7.6.jar \
+    --jars=gs://dataproc-staging-asia-east1-<ProjectNumber>-rrk2ibyt/postgresql-42.7.6.jar \
     ./dataproc_bronze_to_silver.py \
     --properties=spark.executor.heartbeatInterval=300000ms,spark.network.timeout=600000ms`
 
@@ -260,18 +260,18 @@ Also, ensure current user running this command in Powershell has "DataProc Edito
 
 2. Copy the two py files to a bucket from current folder/directory
 
-`gcloud storage cp ./dataproc_bronze_to_silver.py gs://dataproc-temp-asia-east1-440170340627-ggyw9m6j/pyspark/dataproc_bronze_to_silver.py`
+`gcloud storage cp ./dataproc_bronze_to_silver.py gs://dataproc-temp-asia-east1-<ProjectNumber>-ggyw9m6j/pyspark/dataproc_bronze_to_silver.py`
 
-`gcloud storage cp ./setup.py gs://dataproc-temp-asia-east1-440170340627-ggyw9m6j/pyspark/setup.py`
+`gcloud storage cp ./setup.py gs://dataproc-temp-asia-east1-<ProjectNumber>-ggyw9m6j/pyspark/setup.py`
 
 3. Add Pyspark job step. In addition to earlier parameters, include new ones for workflow template and step-id for Scheduler.
    
-`gcloud dataproc workflow-templates add-job pyspark gs://dataproc-temp-asia-east1-440170340627-ggyw9m6j/pyspark/dataproc_bronze_to_silver.py \
+`gcloud dataproc workflow-templates add-job pyspark gs://dataproc-temp-asia-east1-<ProjectNumber>-ggyw9m6j/pyspark/dataproc_bronze_to_silver.py \
   --step-id=bronze-to-silver-step \
   --workflow-template=avito-silver-wf \
   --region=asia-east1 \
-  --py-files=gs://dataproc-temp-asia-east1-440170340627-ggyw9m6j/pyspark/setup.py \
-  --jars=gs://dataproc-staging-asia-east1-440170340627-rrk2ibyt/postgresql-42.7.6.jar \
+  --py-files=gs://dataproc-temp-asia-east1-<ProjectNumber>-ggyw9m6j/pyspark/setup.py \
+  --jars=gs://dataproc-staging-asia-east1-<ProjectNumber>-rrk2ibyt/postgresql-42.7.6.jar \
   --properties=spark.executor.heartbeatInterval=300000ms,spark.network.timeout=600000ms`
 
 
@@ -302,16 +302,16 @@ gcloud services enable iamcredentials.googleapis.com
 
 `gcloud dataproc workflow-templates instantiate avito-silver-wf \
   --region=asia-east1 \
-  --impersonate-service-account=440170340627-compute@developer.gserviceaccount.com \`
+  --impersonate-service-account=<ProjectNumber>-compute@developer.gserviceaccount.com \`
 
 
 9. Set up Cloud Scheduler to run on a scheduled basis
 
     `gcloud scheduler jobs create http bronze-to-silver-job \
   --schedule="0 2 * * *" \
-  --uri="https://dataproc.googleapis.com/v1/projects/key-petal-471015-g3/regions/asia-east1/workflowTemplates/avito-silver-wf:instantiate" \
+  --uri="https://dataproc.googleapis.com/v1/projects/<ProjectID>/regions/asia-east1/workflowTemplates/avito-silver-wf:instantiate" \
   --http-method=POST \
-  --oidc-service-account-email=440170340627-compute@developer.gserviceaccount.com  \
+  --oidc-service-account-email=<ProjectNumber>-compute@developer.gserviceaccount.com  \
   --oidc-token-audience="https://dataproc.googleapis.com/" \
   --time-zone="Asia/Kolkata" \
   --location=asia-east1`
@@ -321,13 +321,13 @@ gcloud services enable iamcredentials.googleapis.com
 
   View All scheduled Jobs
 
-  `gcloud scheduler jobs list --location=asia-east1 --project=key-petal-471015-g3`
+  `gcloud scheduler jobs list --location=asia-east1 --project=<ProjectID>`
 
   View details of a specific job
 
   `gcloud scheduler jobs describe bronze-to-silver-job \
   --location=asia-east1 \
-  --project=key-petal-471015-g3`
+  --project=<ProjectID>`
 
   
    
@@ -335,7 +335,7 @@ gcloud services enable iamcredentials.googleapis.com
 
     `gcloud scheduler jobs run bronze-to-silver-job \
   --location=asia-east1 \
-  --project=key-petal-471015-g3`
+  --project=<ProjectID>`
    
 
 
