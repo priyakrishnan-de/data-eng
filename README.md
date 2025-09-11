@@ -1,35 +1,35 @@
 # # data-eng
 This is repo where data engineering learning project code is stored.
 
-## **.ssh**
+## **SSH**
 Sample config file to ssh VM instance in GCP
 
-_config_
+_.ssh/config_
 
-## **terraform**
+## **Terraform**
 Sample terraform config file to spin up Google cloud bucket and Bigquery instance
 
-*main.tf*
+_terraform/main.tf_
 
-*variables.tf*
+_terraform/variables.tf_
 
 
 ## **Python basic exercises**
 1. Count the number of each elements in a List
 
-_/python/count-elements.py_
+_python/count-elements.py_
 
 2. Compare 2 lists and print common elements
 
-_/python/compare-lists.py_
+_python/compare-lists.py_
 
 3. Combine 2 lists
 
-_/python/combine-lists.py_
+_python/combine-lists.py_
 
 4. Split a string of a sentence into lists of 2 words. Input: "Today is a good day to learn Python". Output: [[Today, is], [a, good], [day, to], [learn, Python]]
 
-_/python/split-sen.py_
+_python/split-sen.py_
 
 
 # **Avito context Dataset - Data Engineering Project in Local**
@@ -39,13 +39,13 @@ _**Step 1. Ingest raw data**_
 This file loads 10 files from local folder to postgres tables running in local directly in python (no airflow) except trainsearchstream. File names are mapped to table names and data is inserted in respective tables in a for loop. Each of the tables are created if they do not exist and data is inserted in the most efficient way based on file size:
 There are three methods of loading data used in this file - 1) small csv files 2) large TSV files 3) large CSV files
 
-_/python/avito-context/avito-ingestdata.py_
+_python/avito-context/avito-ingestdata.py_
 
 _**Step 2.Simulate trainsearchstream data**_
 
 This file simulates data for trainsearchstream from testseacrhstream using python (no airflow). Both tables have same structure except additional column of "isClick" in trainseachstream (as original 7z file for trainsearchsteam is corrupted, used this script to load data). Logic followed is "Isclick" is null when objecttype is 3, else it could be 0 or 1 based on Kaggle instructions. Randomly around 5% of records inserted with isclick as 1. 
 
-_/python/avito-context/avito-simulate-trainsearchstream.py_
+_python/avito-context/avito-simulate-trainsearchstream.py_
 
 Now all 11 tables are loaded (All raw data ingested).
 
@@ -56,21 +56,22 @@ In order for Airflow instance to connect to local postgres (running outside dock
 Also, pg_hba.conf should have an entry which mentions IP of host machine (instead of localhost which is not recognized by docker).  
 Note: Did not use postgres instance inside docker for now - will attempt using docker postgres instance after completing this project end to end in local postgres as it is easier to navigate.
 
-_/airflow/dags/postgres_conn_test.py_ - uses Airflow connection ID
-_/airflow/dags/postgres_local_test.py_ - Directly includes credentials, instead of IP - host.docker.internal is mentioned
+_airflow/dags/postgres_conn_test.py_ - uses Airflow connection ID
+
+_airflow/dags/postgres_local_test.py_ - Directly includes credentials, instead of IP - host.docker.internal is mentioned
 
 _**Step 4. Producer - Continous simulation of additional data for trainsearchstream**_
 
 Airflow - DAG created to continously produce Ad clicks & searches ie "trainsearchstream" table with objecttype/isclick logic followed. This inserts records in batches of 10 when DAG is active as per DAG schedule interval.
 
-_/airflow/dags/producer-simulate.py_
+_airflow/dags/producer-simulate.py_
 
 _**Step 5. Consumer extract to CSV - Continous extraction of new records since last run to local in CSV format**_
 
 Airflow - DAG to continously extract data created in "trainsearchstream" since the last run ie simulated data/delta alone is extracted. This is done by having an csv extract marker table where the last extracted id is stored. 
 Data is extracted in CSV file with timestamp and file is stored in "tmp/csv_timestamp.csv" within the Airflow worker docker container.
 
-_/airflow/dags/consumer-extract-lastrun.py_
+_airflow/dags/consumer-extract-lastrun.py_
 
 The files can be viewed with this command:
 
@@ -80,12 +81,18 @@ To copy these files from docker container to local, this command can be used:
 
 `docker cp <workerconatinerid>:/tmp ./airflow_tmp`
 
-_**Step 5. BRONZE Layer / Staging - Raw data of delta records**_
+_**Step 5. BRONZE Layer / Staging - Raw data of delta records in Cloud SQL and GCS Bucket**_
 
 Airflow - DAG to continously extract data created in "trainsearchstream" since the last run and insert them into another staging table "trainsearchstream_staging" with basic transformations such as de-duplication, cleansing and typecasting before inserting the records. This is considered as Bronze layer. 
 This uses "staging_extract marker" table which has a row for every delta run. 
 
-_/airflow/dags/load_delta_staging.py_
+_airflow/dags/load_delta_staging.py_
+
+Cloud Scheduler for Data export of delta records into GCS:
+
+_trigger-auto-data-export_
+
+
 
 _**Step 6. SILVER Layer - Joins and Enrichment**_
 
@@ -95,7 +102,7 @@ Silver layer load query is available in Word doc:
 
 Enrichment:  new columns High_ctr and ad_type defined based on business logic. High_ctr = True if Histctr > 0.5, ad_type is  1: 'regular-free', 2: 'regular-highlighted', 3: 'contextual-payperclick' based on object type 1,2,3
 
-_/airflow/dags/load_delta_silver.py_
+_airflow/dags/load_delta_silver.py_
 
 _**Step 7. GOLD Layer - Aggregrations based on use cases**_
 
@@ -103,6 +110,7 @@ Airflow - DAG to continously aggregate data from silver layer and join with few 
 All business use cases for arriving at gold layer tables/views along with queries are available in word doc:
 [Avito Data Model Description_Silver_Gold layer queries.docx](https://github.com/priyakrishnan-de/data-eng/blob/main/Avito%20Data%20Model%20Description_Silver_Gold%20layer%20queries.docx)
 
+_airflow/dags/load_gold_layer.py_
 
 # **Avito context project - Data Engineering Project in GCP**
 
@@ -127,12 +135,13 @@ _**Step 3. Ingest raw data**_
 This step utilizes airflow DAG running within **Cloud composer** to ingest 8 large datasets from GCS bucket into Postgresql in **Cloud SQL**. 
 DAG's were independently called in paralle as they were not dependent on each other.
 
-_gcp_dag_avito-ingestrawdata_
+_airflow/dags/gcp_dag_avito-ingestrawdata_
 
 Old files which were not efficient while running in GCP Cloud composer/Airflow:
 
-_gcp_dag_avito-ingestrawdata_1
-gcp_dag_avito-ingestrawdata_2_
+_airflow/dags/gcp_dag_avito-ingestrawdata_1_
+
+_airflow/dags/gcp_dag_avito-ingestrawdata_2_
 
 
 **Connectivity:**
@@ -148,7 +157,7 @@ _**Step 4A. One time Simulation of TrainSearchStream from TestSearchStream**_
 This step of inserting simulated data into TrainSearchStream  (one time run) from TestSearchStream along with Including new column "IsClick" (based on ObjectType) was done using local airflow to test the connectivity from local airflow to GCP Postgresql.
 Two DAG's - one to create tables if they dont exist followed by insertion of new records in sequence.
 
-_gcp-localairflow-simulate-trainsearchstream.py_
+_airflow/dags/gcp-localairflow-simulate-trainsearchstream.py_
 
 **Connectivity:**
 
@@ -162,7 +171,7 @@ _**Step 4B. Continous simulation of data into TrainSearchStream through producer
 
 This step of continously simulating new data into TrainSearchStream was done using local airflow DAG connecting to Cloud SQL Postgres. 
 
-_gcp-localairflow-producer-trainsearchstream_
+_airflow/dags/gcp-localairflow-producer-trainsearchstream_
 
 
 _**Step 5. Event driven data moevment with Cloud Run Function (dockerised Cloud function) and Cloud Scheduler**_
@@ -171,15 +180,14 @@ Instead of Cloud function, went with Cloud run which packages the service into a
 
 Following files were created to create an application for build followed by run using **Cloud run** and **Cloud Scheduler**.
 
-_Dockerfile
+_cloudrun/Dockerfile_
 
-main.py
+_cloudrun/main.py_
 
-requirements.txt_
+_cloudrun/requirements.txt_
 
 Once the build and run is completed, Service URL is provided as an output of deploying the conatiner.
-https://<cloudrun service name>-<projectnumber>.<region>.run.app
-
+**https://<cloudrun-service-name>-<projectnumber>.<region>.run.app**
 
 Once the service is availble, Scheduler is created in order to schedule the service as per required frequency.
 
@@ -201,14 +209,14 @@ _**Step 6. ETL Pipeline using Google dataflow**_
 
 This dataflow pipeline identifies delta and moves the records in Avro format from source (using SQL command) to the specified target (sink) with path provided for staging, temp and templates. Transformations such as de-duplication, null handling and typecast done.
 
-_delta-to-csv-pipeline.py_
+_avito-dataflow/delta-to-csv-pipeline.py_
 
-_setup.py_
+_avito-dataflow/setup.py_
 
 
 Name of the Dataflow pipeline: 
 
-_avitodelta-cloud-csv_
+_avito-dataflow/avitodelta-cloud-csv_
 
 **Connectivity:**
 
@@ -229,12 +237,12 @@ Also, ensure current user running this command in Powershell has "DataProc Edito
 
 2. Create pyspark file with the logic and setup.py file.
 
-   _dataproc_bronze_to_silver.py_
+   _avito-dataflow/dataproc_bronze_to_silver.py_
 
    Has logic to left join brnoze table with SearchInfo and AdsInfo and also with category and location table. New columns for high_ctr was added for enrinchment.
    This wil replace the current data in silver table.
 
-   _setup.py_
+   _avito-dataflow/setup.py_
 
    Has dependencies for pandas, numpy
 
@@ -277,8 +285,9 @@ Also, ensure current user running this command in Powershell has "DataProc Edito
 
 4. Ensure to provide default compute Service account these roles first
 
-_Data Proc Worker
-Storage Object Viewer_
+_Data Proc Worker_
+
+_Storage Object Viewer_
 
 5. Service Accunts > Go to the Compute service account
 
@@ -338,6 +347,20 @@ gcloud services enable iamcredentials.googleapis.com
   --project=<ProjectID>`
    
 
+Following are setup in GCP, refer commands in excel.
+
+GCP Workflow for Silver: 
+
+_avito-silver-wf_
+
+GCP Workflow Step ID (just a step name given under workflow):
+
+_bronze_to_silver_step_
+
+GCP Cloud Scheduler for Gold:
+
+_bronze-to-silver_job_
+
 
 _**Step 8. Aggregation tables created in GOLD LAYER in Cloud SQL + Gold layer data stored as CSV files in GCS Bucket**_
 
@@ -346,42 +369,46 @@ Follow same steps as for Step 7.
 
 1. pyspark file for Gold layer performs both the actions of aggregationg tables for gold layer in Cloud SQL as well as storing the same data in GCS Bucket with time stamp.
 
-_dataproc_silver_gold_csv.py_
+_avito-dataproc/dataproc_silver_gold_csv.py_
 
 
 2. pyspark file which only loads tables into Gold Layer SQL Table (does not write to GCS Bucket)
 
-_dataproc_silver_gold.py_
+_avito-dataproc/dataproc_silver_gold.py_
 
 
-Workflow for Gold: 
+Following are setup in GCP, refer commands in excel.
+
+GCP Workflow for Gold: 
 
 _avito-gold-wf_
 
-Workflow Step ID:
+GCP Workflow Step ID (just a step name given under workflow):
 
 _silver_to_gold_step_
 
-Cloud Scheduler for Gold:
+GCP Cloud Scheduler for Gold:
 
-_silver-to-gold.py_
+_silver-to-gold_job_
 
 
 _**Step 9. Medallion Architecture**_
 
-Raw data: All tables ingested
+Summary of layers, these are already in previous steps.
 
-One time Simulated data: TrainSearchstream (from TestSearchstream)
+_Raw data_: All tables ingested
+
+_One time Simulated data_: TrainSearchstream (from TestSearchstream)
 
 Continous Simulation of 10 new records every 10 minutes into TrainSearchstream through Cloud Composer/Airflow
 
-BRONZE Layer: New records inserted into "TrainSearchstream" is moved to **"TrainSearchStream_Staging"** continously every 30 minutes through Cloud Composer/Airflow. 
+_BRONZE Layer_: New records inserted into "TrainSearchstream" is moved to **"TrainSearchStream_Staging"** continously every 30 minutes through Cloud Composer/Airflow. 
 This table along with rest of the RAW DATA tables (except TestSearchStream/TrainSearchStream) considered as BRONZE layer.
 
-SILVER Layer: "TrainSeacrchStream_staging" is joined with "SearchInfo", "AdsInfo", "Location", "Category",  new columns added to load to **"TrainSearchstream_Silver"**.
+_SILVER Layer_: "TrainSeacrchStream_staging" is joined with "SearchInfo", "AdsInfo", "Location", "Category",  new columns added to load to **"TrainSearchstream_Silver"**.
 Data is truncated and inseretd every time. This is done through Cloud scheduler job which calls Dataproc Workflow template.
 
-GOLD Layer: "TrainSearchStream_Silver" is aggregated and based on use case, data from "PhoneSearchStream", "VisitsStream" is also aggregated to store in various gold tables or gold views as applicable. 
+_GOLD Layer_: "TrainSearchStream_Silver" is aggregated and based on use case, data from "PhoneSearchStream", "VisitsStream" is also aggregated to store in various gold tables or gold views as applicable. 
 Data is truncated and inseretd every time. This is done through Cloud scheduler job which calls Dataproc Workflow template.
 
 All gold layer tables and views can be viewed in this doc:
