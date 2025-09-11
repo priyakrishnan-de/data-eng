@@ -209,14 +209,14 @@ _**Step 6. ETL Pipeline using Google dataflow**_
 
 This dataflow pipeline identifies delta and moves the records in Avro format from source (using SQL command) to the specified target (sink) with path provided for staging, temp and templates. Transformations such as de-duplication, null handling and typecast done.
 
-_avito-dataflow/delta-to-csv-pipeline.py_
+_dataflow/delta-to-csv-pipeline.py_
 
-_avito-dataflow/setup.py_
+_dataflow/setup.py_
 
 
 Name of the Dataflow pipeline: 
 
-_avito-dataflow/avitodelta-cloud-csv_
+_dataflow/avitodelta-cloud-csv_
 
 **Connectivity:**
 
@@ -237,12 +237,12 @@ Also, ensure current user running this command in Powershell has "DataProc Edito
 
 2. Create pyspark file with the logic and setup.py file.
 
-   _avito-dataflow/dataproc_bronze_to_silver.py_
+   _dataflow/dataproc_bronze_to_silver.py_
 
    Has logic to left join brnoze table with SearchInfo and AdsInfo and also with category and location table. New columns for high_ctr was added for enrinchment.
    This wil replace the current data in silver table.
 
-   _avito-dataflow/setup.py_
+   _dataflow/setup.py_
 
    Has dependencies for pandas, numpy
 
@@ -369,12 +369,12 @@ Follow same steps as for Step 7.
 
 1. pyspark file for Gold layer performs both the actions of aggregationg tables for gold layer in Cloud SQL as well as storing the same data in GCS Bucket with time stamp.
 
-_avito-dataproc/dataproc_silver_gold_csv.py_
+_dataproc/dataproc_silver_gold_csv.py_
 
 
 2. pyspark file which only loads tables into Gold Layer SQL Table (does not write to GCS Bucket)
 
-_avito-dataproc/dataproc_silver_gold.py_
+_dataproc/dataproc_silver_gold.py_
 
 
 Following are setup in GCP, refer commands in excel.
