@@ -1,0 +1,10 @@
+#folder to be ignored
+terraform/
+
+#All JSON files, public and private keys to be ignored
+*.json
+*.pub
+gcp
+
+
+
