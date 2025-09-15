@@ -97,8 +97,11 @@ _trigger-auto-data-export_
 _**Step 6. SILVER Layer - Joins and Enrichment**_
 
 Aiflow - DAG to continously extract data in Bronze /staging table "trainsearchstream_staging" and insert them into another staging table "trainsearchstream_silver", delta is extracted based on max id already in silver table. 
-Silver layer load query is available in Word doc:
-[Avito Data Model Description_Silver_Gold layer queries.docx](https://github.com/priyakrishnan-de/data-eng/blob/main/Avito%20Data%20Model%20Description_Silver_Gold%20layer%20queries.docx)
+
+Silver layer load query is available here:
+
+_sql-local/load_delta_silver.py_
+
 
 Enrichment:  new columns High_ctr and ad_type defined based on business logic. High_ctr = True if Histctr > 0.5, ad_type is  1: 'regular-free', 2: 'regular-highlighted', 3: 'contextual-payperclick' based on object type 1,2,3
 
@@ -107,10 +110,19 @@ _airflow/dags/load_delta_silver.py_
 _**Step 7. GOLD Layer - Aggregrations based on use cases**_
 
 Airflow - DAG to continously aggregate data from silver layer and join with few other tables as necessary to create aggregate/summary tables in gold layer. This layer is not optimized and more use cases were arrived and done for practice.
-All business use cases for arriving at gold layer tables/views along with queries are available in word doc:
-[Avito Data Model Description_Silver_Gold layer queries.docx](https://github.com/priyakrishnan-de/data-eng/blob/main/Avito%20Data%20Model%20Description_Silver_Gold%20layer%20queries.docx)
 
 _airflow/dags/load_gold_layer.py_
+
+All business use cases including Use Case categories and use cases for arriving at gold layer tables/views are available in word doc:
+
+[Avito Data Model Description and Gold Layer Use cases](https://docs.google.com/document/d/1Wmr29XFnuO2jOzSeWZmGXSAP_c3udd4Y/edit?usp=drive_link&ouid=117556559172603166026&rtpof=true&sd=true)
+
+All queries for creating 24 gold layer tables are views are available in "sql-local" folder and all files start with "load_gold_layer":
+
+_sql-local/load_gold_layer$$<Use-Case-Category-Name>$$-$$<Use-Case-Name>$$.sql_
+
+Use case categories and uase cases availavle in word doc.
+
 
 # **Avito context project - Data Engineering Project in GCP**
 
@@ -137,7 +149,7 @@ DAG's were independently called in paralle as they were not dependent on each ot
 
 _airflow/dags/gcp_dag_avito-ingestrawdata_
 
-Old files which were not efficient while running in GCP Cloud composer/Airflow:
+Old files which were not efficient while running large TSV files in GCP Cloud composer/Airflow:
 
 _airflow/dags/gcp_dag_avito-ingestrawdata_1_
 
@@ -415,7 +427,8 @@ In addition, CSV of records from each run are stored in GCS Bucket in format  _T
 
 All gold layer tables and views can be viewed in this doc:
 
-[Avito Data Model Description_Silver_Gold layer queries.docx](https://github.com/priyakrishnan-de/data-eng/blob/main/Avito%20Data%20Model%20Description_Silver_Gold%20layer%20queries.docx)
+[Avito Data Model Description and Gold Layer Use cases](https://docs.google.com/document/d/1Wmr29XFnuO2jOzSeWZmGXSAP_c3udd4Y/edit?usp=drive_link&ouid=117556559172603166026&rtpof=true&sd=true)
+
 
 
 _**Step 10.Data Visualization with Google Data Studio / Looker**_
