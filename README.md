@@ -116,7 +116,7 @@ All queries for creating 24 gold layer tables are views are available in "sql-lo
 
 _sql-local/load_gold_layer$$<Use-Case-Category-Name>$$-$$<Use-Case-Name>$$.sql_
 
-Use case categories and uase cases availavle in word doc.
+Use case categories and use cases available in word doc.
 
 
 # **Avito context project - Data Engineering Project in GCP**
@@ -201,8 +201,9 @@ _cloudrun/main.py_
 
 _cloudrun/requirements.txt_
 
-Once the build and run is completed, Service URL is provided as an output of deploying the conatiner.
-**https://<cloudrun-service-name>-<projectnumber>.<region>.run.app**
+Once the build and run is completed, Service URL is provided as an output of deploying the container.
+
+**https://{cloudrun-service-name}-<<projectnumber>>.<<region>>.run.app**
 
 Once the service is availble, Scheduler is created in order to schedule the service as per required frequency.
 
@@ -219,7 +220,7 @@ Private connection was established between Cloud Run function and Cloud SQL thro
 
 Serverless VPC network was updated with unallocated subnetwork (10.x.x.x) from which IP's will be allocated. 
 
-Cloud Run function was also attached to the same netwrok "default" as Cloud SQL.
+Cloud Run function was also attached to the same network "default" as Cloud SQL.
 
 This connector name needs to be provided in run time whle executing the python file.
 
