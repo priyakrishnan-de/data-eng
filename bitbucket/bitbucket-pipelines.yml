@@ -1,0 +1,47 @@
+image: google/cloud-sdk:slim  # Has gcloud pre-installed
+
+pipelines:
+  default:
+    - step:
+        # name: "Setup GCP Auth"
+        # script:
+          #- echo "🔍 Listing all environment vars..."
+          #- env | sort
+          # Save service account JSON
+          #- echo $GCP_SERVICE_ACCOUNT_KEY > sa-key.json
+          # Activate service account
+          #- gcloud auth activate-service-account --key-file=sa-key.json
+          # Set project
+          #- gcloud config set project $GCP_PROJECT_ID      
+          #- echo $GCP_PROJECT_ID
+          #- gcloud projects describe $GCP_PROJECT_ID --format='value(projectNumber)'
+          # Just test gcloud works
+          #- gcloud compute project-info describe --project=$GCP_PROJECT_ID
+        name: "Terraform Init & Apply"
+        services:
+          - docker
+        script:
+          - apt-get update && apt-get install -y unzip curl
+          - curl -fsSL https://releases.hashicorp.com/terraform/1.9.5/terraform_1.9.5_linux_amd64.zip -o /tmp/terraform.zip
+          - unzip -o -q /tmp/terraform.zip -d /tmp/
+          - mv /tmp/terraform /usr/local/bin/
+          - terraform -version
+         
+          # Install Terraform
+          #- apt-get update && apt-get install -y unzip curl
+          #- curl -fsSL https://releases.hashicorp.com/terraform/1.9.5/terraform_1.9.5_linux_amd64.zip -o terraform.zip
+          #- unzip terraform.zip
+          #- unzip -o -q terraform.zip          # <- overwrite without asking
+          #- mv terraform /usr/local/bin/
+          #- terraform -version      
+        
+          # 2. Authenticate with GCP
+          - echo "$GCP_SERVICE_ACCOUNT_KEY" > key.json
+          - gcloud auth activate-service-account --key-file=key.json
+          - gcloud config set project $GCP_PROJECT_ID
+
+            # 3. Run Terraform
+          - cd terraform #enter terraform code directory
+          - terraform init -backend-config="credentials=../key.json"
+          - terraform plan -out=tfplan -var="credentials_file=../key.json"
+          - terraform apply -auto-approve tfplan
