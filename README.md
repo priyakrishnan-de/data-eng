@@ -188,11 +188,6 @@ This uses "staging_extract marker" table which has a row for every delta run.
 
 _airflow/dags/load_delta_staging.py_
 
-Cloud Scheduler for Data export of delta records into GCS:
-
-_trigger-auto-data-export_
-
-
 
 _**Step 5. Event driven data moevment with Cloud Run Function (dockerised Cloud function) and Cloud Scheduler**_
 
@@ -212,6 +207,11 @@ Once the build and run is completed, Service URL is provided as an output of dep
 Once the service is availble, Scheduler is created in order to schedule the service as per required frequency.
 
 This identifies the newly inserted records (delta) and extracts them to Parquet format and stores in GCS.
+
+Cloud Scheduler for Data export of delta records into GCS:
+
+_trigger-auto-data-export_
+
 
 **Connectivity:**
 
@@ -288,18 +288,20 @@ Also, ensure current user running this command in Powershell has "DataProc Edito
 
 2. Copy the two py files to a bucket from current folder/directory
 
-`gcloud storage cp ./dataproc_bronze_to_silver.py gs://dataproc-temp-asia-east1-<ProjectNumber>-ggyw9m6j/pyspark/dataproc_bronze_to_silver.py`
+Sample Data-Proc Bucket: gs://dataproc-temp-asia-east1-<ProjectNumber>-ggyw9m6j/
 
-`gcloud storage cp ./setup.py gs://dataproc-temp-asia-east1-<ProjectNumber>-ggyw9m6j/pyspark/setup.py`
+`gcloud storage cp ./dataproc_bronze_to_silver.py gs://<<Data-Proc-bucket>>/pyspark/dataproc_bronze_to_silver.py`
+
+`gcloud storage cp ./setup.py gs://<<Data-Proc-bucket>>/pyspark/setup.py`
 
 3. Add Pyspark job step. In addition to earlier parameters, include new ones for workflow template and step-id for Scheduler.
    
-`gcloud dataproc workflow-templates add-job pyspark gs://dataproc-temp-asia-east1-<ProjectNumber>-ggyw9m6j/pyspark/dataproc_bronze_to_silver.py \
+`gcloud dataproc workflow-templates add-job pyspark gs://<<Data-Proc-Bucket>>/pyspark/dataproc_bronze_to_silver.py \
   --step-id=bronze-to-silver-step \
   --workflow-template=avito-silver-wf \
   --region=asia-east1 \
-  --py-files=gs://dataproc-temp-asia-east1-<ProjectNumber>-ggyw9m6j/pyspark/setup.py \
-  --jars=gs://dataproc-staging-asia-east1-<ProjectNumber>-rrk2ibyt/postgresql-42.7.6.jar \
+  --py-files=gs://<<Data-Proc-Bucket>>/pyspark/setup.py \
+  --jars=gs:///<<Data-Proc-Bucket>>/postgresql-42.7.6.jar \
   --properties=spark.executor.heartbeatInterval=300000ms,spark.network.timeout=600000ms`
 
 
