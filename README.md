@@ -203,7 +203,7 @@ _cloudrun/requirements.txt_
 
 Once the build and run is completed, Service URL is provided as an output of deploying the container.
 
-**https://{cloudrun-service-name}-<<projectnumber>>.<<region>>.run.app**
+**https://{cloudrun-service-name}-{projectnumber}.{region}.run.app**
 
 Once the service is availble, Scheduler is created in order to schedule the service as per required frequency.
 
