@@ -39,6 +39,7 @@ resource "google_bigquery_dataset" "priya_dataset" {
   location    = var.location
   description = "Dataset for GCP Training"
 }
+*/
 
 resource "google_cloud_run_service" "service" {
   name     = var.cloud_run_service_name
@@ -71,7 +72,7 @@ resource "google_cloud_run_service" "service" {
     latest_revision = true
   }
 }
-*/
+
 
 resource "google_cloud_scheduler_job" "call_cloudrun" {
   name        = "trigger-cloudrun"
