@@ -203,9 +203,9 @@ _cloudrun/requirements.txt_
 
 Once the build and run is completed, Service URL is provided as an output of deploying the container.
 
-**https://{cloudrun-service-name}-{projectnumber}.{region}.run.app**
+_**https://{cloudrun-service-name}-{projectnumber}.{region}.run.app**_
 
-Once the service is availble, Scheduler is created in order to schedule the service as per required frequency.
+Once the service is available, Scheduler is created in order to schedule the service as per required frequency.
 
 This identifies the newly inserted records (delta) and extracts them to Parquet format and stores in GCS.
 
@@ -228,7 +228,7 @@ This connector name needs to be provided in run time whle executing the python f
 
 _**Step 6. ETL Pipeline using Google dataflow**_
 
-This dataflow pipeline identifies delta and moves the records in Avro format from source (using SQL command) to the specified target (sink) with path provided for staging, temp and templates. Transformations such as de-duplication, null handling and typecast done.
+This dataflow pipeline identifies delta and moves the records in Avro format from source (using SQL command) to the specified target (sink) with path provided for staging, temp and templates. Basic checks included are de-duplication, null handling and typecast.
 
 _dataflow/delta-to-csv-pipeline.py_
 
