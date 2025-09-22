@@ -1,0 +1,3 @@
+azure-functions
+pg8000
+pandas
