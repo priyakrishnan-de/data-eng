@@ -38,7 +38,7 @@ def main():
     
     properties = {
         "user": DB_USER,
-        "password": DB_PASSWORD
+        "password": DB_PASSWORD,
         "driver": "org.postgresql.Driver"
     }
     
