@@ -35,6 +35,7 @@ if __name__ == "__main__":
     DB_USER =     os.environ.get('DB_USER', 'postgres') 
     DB_PASSWORD = os.environ.get('DB_PASSWORD', 'Bestofme24!')
     DB_PORT =     os.environ.get('DB_PORT', '5432')
+    BUCKET_NAME = os.environ.get('GCS_BUCKET', 'avito-exported-data-delta')
 
     # JDBC connection details
     jdbc_url = f"jdbc:postgresql://{DB_HOST}:{DB_PORT}/{DB_NAME}"
@@ -46,7 +47,7 @@ if __name__ == "__main__":
     }
 
     # GCS bucket for CSV exports
-    gcs_bucket = "avito-exported-data-delta/gold_layer"
+    gcs_bucket = f"{BUCKET_NAME}/gold_layer"
 
     # --- A1. CTR by Ad type, Category, Region ---
     query_ctr_ad_perf = """
