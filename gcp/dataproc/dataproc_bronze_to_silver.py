@@ -1,4 +1,5 @@
 import sys
+import os
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import when, col, lit, broadcast
 
@@ -24,14 +25,20 @@ def main():
     # a good practice for when you join the small and large dataframes.
     spark.conf.set("spark.sql.autoBroadcastJoinThreshold", "104857600") # 100 MB
 
+    DB_HOST =     os.environ.get('DB_HOST', '10.25.192.3')
+    DB_NAME =     os.environ.get('DB_NAME', 'postgres')
+    DB_USER =     os.environ.get('DB_USER', 'postgres') 
+    DB_PASSWORD = os.environ.get('DB_PASSWORD', 'Bestofme24!')
+    DB_PORT =     os.environ.get('DB_PORT', '5432')
+
     # ------------------------------------
     # Cloud SQL Connection Properties
     # ------------------------------------
-    jdbc_url = f"jdbc:postgresql://10.25.192.3:5432/postgres"
+    jdbc_url = f"jdbc:postgresql://{DB_HOST}:{DB_PORT}/{DB_NAME}"
     
     properties = {
-        "user": "postgres",
-        "password": "Bestofme24!",
+        "user": DB_USER,
+        "password": DB_PASSWORD
         "driver": "org.postgresql.Driver"
     }
     

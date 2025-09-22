@@ -1,3 +1,4 @@
+import os
 from pyspark.sql import SparkSession
 
 def run_query(spark, jdbc_url, properties, query, table_name):
@@ -20,11 +21,18 @@ def run_query(spark, jdbc_url, properties, query, table_name):
 if __name__ == "__main__":
     spark = SparkSession.builder.appName("GoldLayerTables").getOrCreate()
 
+    DB_HOST =     os.environ.get('DB_HOST', '10.25.192.3')
+    DB_NAME =     os.environ.get('DB_NAME', 'postgres')
+    DB_USER =     os.environ.get('DB_USER', 'postgres') 
+    DB_PASSWORD = os.environ.get('DB_PASSWORD', 'Bestofme24!')
+    DB_PORT =     os.environ.get('DB_PORT', '5432')
+
     # JDBC connection details
-    jdbc_url = "jdbc:postgresql://10.25.192.3:5432/postgres"
+    jdbc_url = f"jdbc:postgresql://{DB_HOST}:{DB_PORT}/{DB_NAME}"
+
     connection_properties = {
-        "user": "postgres",
-        "password": "Bestofme24!",
+        "user": DB_USER,
+        "password": DB_PASSWORD,
         "driver": "org.postgresql.Driver"
     }
 
