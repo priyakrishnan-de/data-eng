@@ -1,4 +1,4 @@
-# # data-eng
+# data-eng
 
 This is repo where data engineering learning project code is stored.
 
@@ -96,14 +96,16 @@ _python/split-sen.py_
 
 # **Avito context Dataset - Data Engineering Project in Local**
 
-_**Ingest raw data**_
+
+## **Ingest raw data**
 
 This file loads 10 files from local folder to postgres tables running in local directly in python (no airflow) except trainsearchstream. File names are mapped to table names and data is inserted in respective tables in a for loop. Each of the tables are created if they do not exist and data is inserted in the most efficient way based on file size:
 There are three methods of loading data used in this file - 1) small csv files 2) large TSV files 3) large CSV files
 
 _python/avito-context/avito-ingestdata.py_
 
-_**Simulate trainsearchstream data**_
+
+## **Simulate trainsearchstream data**
 
 This file simulates data for trainsearchstream from testseacrhstream using python (no airflow). Both tables have same structure except additional column of "isClick" in trainseachstream (as original 7z file for trainsearchsteam is corrupted, used this script to load data). Logic followed is "Isclick" is null when objecttype is 3, else it could be 0 or 1 based on Kaggle instructions. Randomly around 5% of records inserted with isclick as 1. 
 
@@ -111,7 +113,8 @@ _python/avito-context/avito-simulate-trainsearchstream.py_
 
 Now all 11 tables are loaded (All raw data ingested).
 
-_**Establish connectivity from airflow to postgres**_
+
+## **Establish connectivity from airflow to postgres**
 
 Establish connection from local airflow to local postgres instance, with postgres running outside docker
 In order for Airflow instance to connect to local postgres (running outside docker), host machine IP need to be used in Airflow "Connections" record. Instead of IP, host.docker.internal can be mentioned in connection record.
@@ -122,13 +125,17 @@ _airflow/dags/postgres_conn_test.py_ - uses Airflow connection ID
 
 _airflow/dags/postgres_local_test.py_ - Directly includes credentials, instead of IP - host.docker.internal is mentioned
 
-_**Producer - Continous simulation of additional data for trainsearchstream**_
+
+
+## **Producer - Continous simulation of additional data for trainsearchstream**
 
 Airflow - DAG created to continously produce Ad clicks & searches ie "trainsearchstream" table with objecttype/isclick logic followed. This inserts records in batches of 10 when DAG is active as per DAG schedule interval.
 
 _airflow/dags/producer-simulate.py_
 
-_**Consumer extract to CSV - Continous extraction of new records since last run to local in CSV format**_
+
+
+## **Consumer extract to CSV - Continous extraction of new records since last run to local in CSV format**
 
 Airflow - DAG to continously extract data created in "trainsearchstream" since the last run ie simulated data/delta alone is extracted. This is done by having an csv extract marker table where the last extracted id is stored. 
 Data is extracted in CSV file with timestamp and file is stored in "tmp/csv_timestamp.csv" within the Airflow worker docker container.
@@ -143,7 +150,9 @@ To copy these files from docker container to local, this command can be used:
 
 `docker cp <workerconatinerid>:/tmp ./airflow_tmp`
 
-_**BRONZE Layer / Staging - Raw data of delta records to Postgres and Local path**_
+
+
+## **BRONZE Layer / Staging - Raw data of delta records to Postgres and Local path**
 
 Airflow - DAG to continously extract data created in "trainsearchstream" since the last run and insert them into another staging table "trainsearchstream_staging" with basic transformations such as de-duplication, cleansing and typecasting before inserting the records. This is considered as Bronze layer. 
 This uses "staging_extract marker" table which has a row for every delta run. 
@@ -151,7 +160,8 @@ This uses "staging_extract marker" table which has a row for every delta run.
 _airflow/dags/load_delta_staging.py_
 
 
-_**SILVER Layer - Joins and Enrichment**_
+
+## **SILVER Layer - Joins and Enrichment**
 
 Aiflow - DAG to continously extract data in Bronze /staging table "trainsearchstream_staging" and insert them into another staging table "trainsearchstream_silver", delta is extracted based on max id already in silver table. 
 
@@ -164,7 +174,9 @@ Enrichment:  new columns High_ctr and ad_type defined based on business logic. H
 
 _airflow/dags/load_delta_silver.py_
 
-_**GOLD Layer - Aggregrations based on use cases**_
+
+
+## **GOLD Layer - Aggregrations based on use cases**
 
 Airflow - DAG to continously aggregate data from silver layer and join with few other tables as necessary to create aggregate/summary tables in gold layer. This layer is not optimized and more use cases were arrived and done for practice.
 
