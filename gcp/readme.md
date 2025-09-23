@@ -14,13 +14,20 @@ Initially, bucket was created, then VM followed by Cloud SQL, Cloud Composer, Da
 
 ## **Step 2. Move datasets from local to GCP**
 
-The datasets were first uploaded from local to **GCS bucket** using glcoud command. Google cloud SDK was installed in local and authenticated.
+The datasets were first uploaded from local to VM using scp from local using ssh credentials to VM. 
 
+From VM, these files were copied to GCS bucket using gsutil cp command. For this to work, VM should be provided "Full Access to all Google API's" which requires stop and restart of VM. 
+
+If bucket was created before this access is provided, may need to specifically set the scope (read/write) of the compute service account so it is able to copy into bucket using gcloud command.
 
 
 ## **Step 3. Ingest raw data**
 
-This step utilizes airflow DAG running within **Cloud composer** to ingest 8 large datasets from GCS bucket into Postgresql in **Cloud SQL**. 
+Run 1: This step utilizes airflow DAG running within **Cloud composer** to ingest 8 large datasets from GCS bucket into Postgresql in **Cloud SQL**. 
+
+
+Run 2 (Setup done for demo as Cloud composer is expensive): Self Managed Airflow was used and Airflow was initiated within virtual environment in VM
+
 
 DAG's were independently called in parallel as they were not dependent on each other.
 

@@ -56,11 +56,14 @@ with DAG(
         pg_hook = PostgresHook(postgres_conn_id=POSTGRES_CONN_ID)
         
         files_to_tables = {
-            #"testSearchStream.tsv": "TestSearchStream",
-            #"PhoneRequestsStream.tsv": "PhoneRequestsStream",
-            #"AdsInfo.tsv": "AdsInfo",
+            "testSearchStream.tsv": "TestSearchStream",
+            "PhoneRequestsStream.tsv": "PhoneRequestsStream",
+            "AdsInfo.tsv": "AdsInfo",
             "VisitsStream.tsv": "VisitsStream",
             "SearchInfo.tsv": "SearchInfo",
+            "Category.tsv": "Category",
+            "Location.tsv": "Location",
+            "UserInfo.tsv": "UserInfo",
         }
         
         for file, table in files_to_tables.items():
