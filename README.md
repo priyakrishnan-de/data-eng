@@ -100,7 +100,11 @@ _python/split-sen.py_
 ## **Ingest raw data**
 
 This file loads 10 files from local folder to postgres tables running in local directly in python (no airflow) except trainsearchstream. File names are mapped to table names and data is inserted in respective tables in a for loop. Each of the tables are created if they do not exist and data is inserted in the most efficient way based on file size:
-There are three methods of loading data used in this file - 1) small csv files 2) large TSV files 3) large CSV files
+There are three methods of loading data used in this file.
+
+1) small TSV files - Category, Location, UserInfo
+2) large TSV files - AdsInfo, SearchInfo, testSearchStream, PhoneRequestsStream, VisitsStream
+3) large CSV files - sampleSubmission, sampleSubmission_HistCTR (only ingested in local project as these are not used)
 
 _python/avito-context/avito-ingestdata.py_
 

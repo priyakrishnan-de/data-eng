@@ -136,10 +136,6 @@ From VM, connectivity was established to Cloud SQL through private network.
 1. Created Dataproc cluster with command, GCP creates default service account automatically. Ensure this GCP service account is provided "DatProc Editor" role.
 Also, ensure current user running this command in Powershell has "DataProc Editor" role. Atleast should have "DataProc Job User" + "DataProc Job Viewer".
 
-
-`gcloud dataproc clusters create avito-pyspark-cluster \ --region=asia-east1 \ --zone=asia-east1-a \ --network=default \ --enable-component-gateway \ --master-machine-type=n1-standard-4 \ --worker-machine-type=n1-standard-4 \ --num-workers=2 \ --image-version=2.1-debian11`
-
-
 2. Create pyspark file with the logic and setup.py file.
 
    _dataflow/dataproc_bronze_to_silver.py_
@@ -156,40 +152,15 @@ Also, ensure current user running this command in Powershell has "DataProc Edito
 
 5. Run the pyspark job using this command to test the pyspark. Have to add cluster (using existing cluster), region, path to setup file. Also added properties for hearbeatinterval and timeout due to the long time it takes to run this job. Database variables are hardcoded in the job.
 
-   `gcloud dataproc jobs submit pyspark \
-    --cluster="avito-pyspark-cluster" \
-    --region="asia-east1" \
-    --py-files=./setup.py \
-    --jars=gs://dataproc-staging-asia-east1-<ProjectNumber>-rrk2ibyt/postgresql-42.7.6.jar \
-    ./dataproc_bronze_to_silver.py \
-    --properties=spark.executor.heartbeatInterval=300000ms,spark.network.timeout=600000ms`
-
 
 **Schedule the DataProc PySpark with Workflow Template and Cloud scheduler**
 
-1. Create a workflow Template, same region and cluster (if any), else default cluster will be created and destroyed.
-
-`gcloud dataproc workflow-templates create avito-silver-wf  --region=asia-east1`
+1. Create a workflow Template, same region and cluster. 
 
 2. Copy the two py files to a bucket from current folder/directory
 
-Sample Data-Proc Bucket: gs://dataproc-temp-asia-east1-<ProjectNumber>-ggyw9m6j/
-
-`gcloud storage cp ./dataproc_bronze_to_silver.py gs://<<Data-Proc-bucket>>/pyspark/dataproc_bronze_to_silver.py`
-
-`gcloud storage cp ./setup.py gs://<<Data-Proc-bucket>>/pyspark/setup.py`
-
 3. Add Pyspark job step. In addition to earlier parameters, include new ones for workflow template and step-id for Scheduler.
    
-`gcloud dataproc workflow-templates add-job pyspark gs://<<Data-Proc-Bucket>>/pyspark/dataproc_bronze_to_silver.py \
-  --step-id=bronze-to-silver-step \
-  --workflow-template=avito-silver-wf \
-  --region=asia-east1 \
-  --py-files=gs://<<Data-Proc-Bucket>>/pyspark/setup.py \
-  --jars=gs:///<<Data-Proc-Bucket>>/postgresql-42.7.6.jar \
-  --properties=spark.executor.heartbeatInterval=300000ms,spark.network.timeout=600000ms`
-
-
 4. Ensure to provide default compute Service account these roles first
 
 _Data Proc Worker_
@@ -206,67 +177,12 @@ gcloud services enable iamcredentials.googleapis.com
 
 7. Set cluster for Workflow template, if not done while creation. (reusing existing cluster).
 
-`gcloud dataproc workflow-templates set-managed-cluster avito-silver-wf \
-  --region=asia-east1 \
-  --cluster-name=bronze-to-silver-temp \
-  --num-workers=2 \
-  --master-machine-type=n1-standard-4 \
-  --worker-machine-type=n1-standard-4`
-
-
 8. Restart this workflow any time, need to use Service account to run it from powershell.
 
-`gcloud dataproc workflow-templates instantiate avito-silver-wf \
-  --region=asia-east1 \
-  --impersonate-service-account=<ProjectNumber>-compute@developer.gserviceaccount.com \`
-
-
-9. Set up Cloud Scheduler to run on a scheduled basis
-
-    `gcloud scheduler jobs create http bronze-to-silver-job \
-  --schedule="0 2 * * *" \
-  --uri="https://dataproc.googleapis.com/v1/projects/<ProjectID>/regions/asia-east1/workflowTemplates/avito-silver-wf:instantiate" \
-  --http-method=POST \
-  --oidc-service-account-email=<ProjectNumber>-compute@developer.gserviceaccount.com  \
-  --oidc-token-audience="https://dataproc.googleapis.com/" \
-  --time-zone="Asia/Kolkata" \
-  --location=asia-east1`
-
-
-10. After the job is scheduled, can be verified by following commands.
-
-  View All scheduled Jobs
-
-  `gcloud scheduler jobs list --location=asia-east1 --project=<ProjectID>`
-
-  View details of a specific job
-
-  `gcloud scheduler jobs describe bronze-to-silver-job \
-  --location=asia-east1 \
-  --project=<ProjectID>`
-
-  
+9. Set up Cloud Scheduler to run on a scheduled basis. Verify the job after creation using commands.
    
-11. To run the scheduler manully for testing from Powershell.
-
-    `gcloud scheduler jobs run bronze-to-silver-job \
-  --location=asia-east1 \
-  --project=<ProjectID>`
-   
-
-Following are setup in GCP, refer commands in excel.
-
-GCP Workflow for Silver: 
-
-_avito-silver-wf_
-
-GCP Workflow Step ID (just a step name given under workflow):
-
-_bronze_to_silver_step_
-
-GCP Cloud Scheduler for Gold:
-
-_bronze-to-silver_job_
+10. Run the job directly using command.
+ 
 
 
 # **Step 8. Aggregation tables created in GOLD LAYER in Cloud SQL + Gold layer data stored as CSV files in GCS Bucket**
@@ -282,21 +198,6 @@ _dataproc/dataproc_silver_gold_csv.py_
 2. pyspark file which only loads tables into Gold Layer SQL Table (does not write to GCS Bucket)
 
 _dataproc/dataproc_silver_gold.py_
-
-
-Following are setup in GCP, refer commands in excel.
-
-GCP Workflow for Gold: 
-
-_avito-gold-wf_
-
-GCP Workflow Step ID (just a step name given under workflow):
-
-_silver_to_gold_step_
-
-GCP Cloud Scheduler for Gold:
-
-_silver-to-gold_job_
 
 
 # **Step 9. Medallion Architecture**
