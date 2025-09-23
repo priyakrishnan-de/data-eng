@@ -7,7 +7,6 @@ This is repo where data engineering learning project code is stored.
 
 Excel with the steps and commands for using basic GitBash commands, docker, local airflow, gcloud and terraform basics.
 
-**Reference Sheet:**
 
 https://docs.google.com/spreadsheets/d/1a-i5N9MtxRWyhSBlCvmqUK_TV9Ea-E_V/edit?usp=sharing&ouid=117556559172603166026&rtpof=true&sd=true
 
@@ -27,11 +26,13 @@ _sql-local/load_gold_layer$$<Use-Case-Category-Name>$$-$$<Use-Case-Name>$$.sql_
 Here, "Use Case Category" and "Use Case Name" stand for the 24 use cases for gold layer which is available in word doc.
 
 
+
 ## **Local - Avito context project**
 
 Steps for local project is over here:
 
 https://github.com/priyakrishnan-de/data-eng?tab=readme-ov-file#avito-context-dataset---data-engineering-project-in-local
+
 
 
 ## **GCP - Avito context project**
@@ -45,6 +46,7 @@ Sheet "GCP" has the steps and commands followed in GCP.
 https://docs.google.com/spreadsheets/d/1a-i5N9MtxRWyhSBlCvmqUK_TV9Ea-E_V/edit?usp=sharing&ouid=117556559172603166026&rtpof=true&sd=true
 
 
+
 ## **Azure - Avito context project**
 
 Steps for Avito project in Azure is here:
@@ -56,10 +58,12 @@ Sheet "Azure" has the steps and commands followed in Azure.
 https://docs.google.com/spreadsheets/d/1a-i5N9MtxRWyhSBlCvmqUK_TV9Ea-E_V/edit?usp=sharing&ouid=117556559172603166026&rtpof=true&sd=true
 
 
+
 ## **SSH**
 Sample config file to ssh VM instance in GCP
 
 _.ssh/config_
+
 
 
 ## **Terraform**
