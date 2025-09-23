@@ -7,48 +7,53 @@ This is repo where data engineering learning project code is stored.
 
 Excel with the steps and commands for using basic GitBash commands, docker, local airflow, gcloud and terraform basics.
 
-Sheet "GCP" has the steps and commands followed in GCP.
+**Reference Sheet:**
 
-Sheet "Azure" has the steps and commands followed in Azure.
+https://docs.google.com/spreadsheets/d/1a-i5N9MtxRWyhSBlCvmqUK_TV9Ea-E_V/edit?usp=sharing&ouid=117556559172603166026&rtpof=true&sd=true
 
-Reference Sheet (https://docs.google.com/spreadsheets/d/1a-i5N9MtxRWyhSBlCvmqUK_TV9Ea-E_V/edit?usp=sharing&ouid=117556559172603166026&rtpof=true&sd=true)
 
 
 ## **Data Model description, SQL Queries and Analysis on Gold Layer**
 
-All business use cases including Use Case categories and use cases for arriving at gold layer tables/views are available in word doc:
+1. All business use cases including Use Case categories and use cases for arriving at gold layer tables/views are available in word doc:
 
 [Avito Data Model Description and Gold Layer Use cases](https://docs.google.com/document/d/1Wmr29XFnuO2jOzSeWZmGXSAP_c3udd4Y/edit?usp=drive_link&ouid=117556559172603166026&rtpof=true&sd=true)
 
-All queries for creating 24 gold layer tables are views are available in "sql-local" folder and all files start with "load_gold_layer":
+
+2. All queries for creating gold layer tables are views are available in "sql-local" folder and all files start with "load_gold_layer". 
 
 _sql-local/load_gold_layer$$<Use-Case-Category-Name>$$-$$<Use-Case-Name>$$.sql_
 
-Here, each of the Use case categories and use cases available in word doc.
+Here, "Use Case Category" and "Use Case Name" stand for the 24 use cases for gold layer which is available in word doc.
 
 
 ## **Local - Avito context project**
 
 Steps for local project is over here:
 
-
-SQL commands for local project is in folder:
-
-
-Analysis of gold layer tables is here:
+https://github.com/priyakrishnan-de/data-eng?tab=readme-ov-file#avito-context-dataset---data-engineering-project-in-local
 
 
 ## **GCP - Avito context project**
 
 Steps for Avito project in GCP is here:
-<>
 
+https://github.com/priyakrishnan-de/data-eng/blob/main/gcp/readme.md
+
+
+Sheet "GCP" has the steps and commands followed in GCP.
+https://docs.google.com/spreadsheets/d/1a-i5N9MtxRWyhSBlCvmqUK_TV9Ea-E_V/edit?usp=sharing&ouid=117556559172603166026&rtpof=true&sd=true
 
 
 ## **Azure - Avito context project**
 
-Steps for Avito project in Azure:
-<>
+Steps for Avito project in Azure is here:
+
+https://github.com/priyakrishnan-de/data-eng/blob/main/azure/readme.md
+
+
+Sheet "Azure" has the steps and commands followed in Azure.
+https://docs.google.com/spreadsheets/d/1a-i5N9MtxRWyhSBlCvmqUK_TV9Ea-E_V/edit?usp=sharing&ouid=117556559172603166026&rtpof=true&sd=true
 
 
 ## **SSH**
@@ -56,12 +61,14 @@ Sample config file to ssh VM instance in GCP
 
 _.ssh/config_
 
+
 ## **Terraform**
 Sample terraform config file to spin up Google cloud bucket and Bigquery instance
 
 _terraform/main.tf_
 
 _terraform/variables.tf_
+
 
 
 ## **Python basic exercises**
@@ -80,6 +87,7 @@ _python/combine-lists.py_
 4. Split a string of a sentence into lists of 2 words. Input: "Today is a good day to learn Python". Output: [[Today, is], [a, good], [day, to], [learn, Python]]
 
 _python/split-sen.py_
+
 
 
 # **Avito context Dataset - Data Engineering Project in Local**

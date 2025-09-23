@@ -1,8 +1,10 @@
 # # **Avito context Dataset - Data Engineering Project in GCP**
 
-Refer sheet "GCP" in this excel for the steps and commands followed:
-Reference Sheet (https://docs.google.com/spreadsheets/d/1a-i5N9MtxRWyhSBlCvmqUK_TV9Ea-E_V/edit?usp=sharing&ouid=117556559172603166026&rtpof=true&sd=true)
+Refer sheet "GCP" in this excel for the steps and commands followed.
 
+**Reference Sheet:**
+
+https://docs.google.com/spreadsheets/d/1a-i5N9MtxRWyhSBlCvmqUK_TV9Ea-E_V/edit?usp=sharing&ouid=117556559172603166026&rtpof=true&sd=true
 
 
 _**Step 1. Creation of basic resources required in GCP**_
@@ -29,7 +31,7 @@ _airflow/dags/gcp_dag_avito-ingestrawdata_1_
 _airflow/dags/gcp_dag_avito-ingestrawdata_2_
 
 
-**Connectivity:**
+_**Connectivity between Cloud SQL and Cloud Composer:**_
 
 Required private connection between Cloud SQL and Cloud composer. For Cloud SQL, both private IP and public IP was enabled.
 Cloud composer connects to Cloud sql using private IP of Cloud SQL.
@@ -44,7 +46,8 @@ Two DAG's - one to create tables if they dont exist followed by insertion of new
 
 _airflow/dags/gcp-localairflow-simulate-trainsearchstream.py_
 
-**Connectivity:**
+
+_**Connectivity between local airflow and Cloud SQL:**_
 
 This required public IP of Cloud SQL to be specified in Airflow connection record in local airflow.
 Also, IP address of local was added to the allowed network in Cloud SQL instance under Network configuration.
@@ -92,7 +95,7 @@ Cloud Scheduler for Data export of delta records into GCS:
 _trigger-auto-data-export_
 
 
-**Connectivity:**
+_**Connectivity between Cloud Run and Cloud SQL:**_
 
 Private connection was established between Cloud Run function and Cloud SQL through Serverless VPC Access.
 
@@ -117,7 +120,8 @@ Name of the Dataflow pipeline:
 
 _dataflow/avitodelta-cloud-csv_
 
-**Connectivity:**
+
+_**Connectivity between Dataflow and Cloud SQL:**
 
 Required Cloud SQL Proxy which was done through VM.
 
