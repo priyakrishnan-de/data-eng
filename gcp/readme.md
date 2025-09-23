@@ -1,4 +1,4 @@
-# # **Avito context Dataset - Data Engineering Project in GCP**
+# **Avito context Dataset - Data Engineering Project in GCP**
 
 Refer sheet "GCP" in this excel for the steps and commands followed.
 
@@ -6,19 +6,19 @@ Refer sheet "GCP" in this excel for the steps and commands followed.
 https://docs.google.com/spreadsheets/d/1a-i5N9MtxRWyhSBlCvmqUK_TV9Ea-E_V/edit?usp=sharing&ouid=117556559172603166026&rtpof=true&sd=true
 
 
-# **Step 1. Creation of basic resources required in GCP**
+## **Step 1. Creation of basic resources required in GCP**
 
 Resources created on need basis before each step.
 Initially, bucket was created, then VM followed by Cloud SQL, Cloud Composer, Dataflow, Dataproc whenever needed, just before execution.
 
 
-# **Step 2. Move datasets from local to GCP**
+## **Step 2. Move datasets from local to GCP**
 
 The datasets were first uploaded from local to **GCS bucket** using glcoud command. Google cloud SDK was installed in local and authenticated.
 
 
 
-# **Step 3. Ingest raw data**
+## **Step 3. Ingest raw data**
 
 This step utilizes airflow DAG running within **Cloud composer** to ingest 8 large datasets from GCS bucket into Postgresql in **Cloud SQL**. 
 
@@ -41,7 +41,7 @@ Both Cloud SQL and Cloud composer are attached to same "default" network and "de
 
 
 
-# **Step 4A. One time Simulation of TrainSearchStream from TestSearchStream**
+## **Step 4A. One time Simulation of TrainSearchStream from TestSearchStream**
 
 This step of inserting simulated data into TrainSearchStream  (one time run) from TestSearchStream along with Including new column "IsClick" (based on ObjectType) was done using local airflow to test the connectivity from local airflow to GCP Postgresql.
 Two DAG's - one to create tables if they dont exist followed by insertion of new records in sequence.
@@ -57,14 +57,14 @@ Also, IP address of local was added to the allowed network in Cloud SQL instance
 This requires ingress firewall rule to allow connections to Cloud SQL Instance (destination - Public IP of Cloud SQL).
 
 
-# **Step 4B. Continous simulation of data into TrainSearchStream through producer in BRONZE layer**
+## **Step 4B. Continous simulation of data into TrainSearchStream through producer in BRONZE layer**
 
 This step of continously simulating new data into TrainSearchStream was done using local airflow DAG connecting to Cloud SQL Postgres. 
 
 _airflow/dags/gcp-localairflow-producer-trainsearchstream_
 
 
-# **Step 4C. BRONZE Layer base data - Identify delta from TrainSearchStream and insert into TrainSearchStream_Staging**
+## **Step 4C. BRONZE Layer base data - Identify delta from TrainSearchStream and insert into TrainSearchStream_Staging**
 
 Airflow - DAG to continously extract data created in "trainsearchstream" since the last run and insert them into another staging table "trainsearchstream_staging" with basic transformations such as de-duplication, cleansing and typecasting before inserting the records. This is considered as Bronze layer. 
 This uses "staging_extract marker" table which has a row for every delta run. 
@@ -72,7 +72,7 @@ This uses "staging_extract marker" table which has a row for every delta run.
 _airflow/dags/load_delta_staging.py_
 
 
-# **Step 5. Event driven data moevment with Cloud Run Function (dockerised Cloud function) and Cloud Scheduler**
+## **Step 5. Event driven data moevment with Cloud Run Function (dockerised Cloud function) and Cloud Scheduler**
 
 Instead of Cloud function, went with Cloud run which packages the service into a container.
 
@@ -109,7 +109,7 @@ This connector name needs to be provided in run time whle executing the python f
 
 
 
-# **Step 6. ETL Pipeline using Google dataflow**
+## **Step 6. ETL Pipeline using Google dataflow**
 
 This dataflow pipeline identifies delta and moves the records in Avro format from source (using SQL command) to the specified target (sink) with path provided for staging, temp and templates. Basic checks included are de-duplication, null handling and typecast.
 
@@ -131,7 +131,7 @@ From VM, connectivity was established to Cloud SQL through private network.
 
 
 
-# **Step 7. Data Transformation with Datproc and PySpark into SILVER LAYER Cloud SQL**
+## **Step 7. Data Transformation with Datproc and PySpark into SILVER LAYER Cloud SQL**
 
 1. Created Dataproc cluster with command, GCP creates default service account automatically. Ensure this GCP service account is provided "DatProc Editor" role.
 Also, ensure current user running this command in Powershell has "DataProc Editor" role. Atleast should have "DataProc Job User" + "DataProc Job Viewer".
@@ -185,7 +185,7 @@ gcloud services enable iamcredentials.googleapis.com
  
 
 
-# **Step 8. Aggregation tables created in GOLD LAYER in Cloud SQL + Gold layer data stored as CSV files in GCS Bucket**
+## **Step 8. Aggregation tables created in GOLD LAYER in Cloud SQL + Gold layer data stored as CSV files in GCS Bucket**
 
 
 Follow same steps as for Step 7.
@@ -200,7 +200,7 @@ _dataproc/dataproc_silver_gold_csv.py_
 _dataproc/dataproc_silver_gold.py_
 
 
-# **Step 9. Medallion Architecture**
+## **Step 9. Medallion Architecture**
 
 Summary of layers, these are already in previous steps.
 
@@ -230,7 +230,7 @@ All gold layer tables and views can be viewed in this doc:
 
 
 
-# **Step 10.Data Visualization with Google Data Studio / Looker**
+## **Step 10.Data Visualization with Google Data Studio / Looker**
 
 Due to issues in enabling Looker Studio in region asia-east1, data was pushed to BigQuery alone for now.
 
