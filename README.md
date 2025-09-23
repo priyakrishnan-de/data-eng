@@ -8,6 +8,12 @@ This is repo where data engineering learning project code is stored.
 Excel with the steps and commands for using basic GitBash commands, docker, local airflow, gcloud and terraform basics.
 
 
+Sheet "GCP" has the steps and commands followed in GCP.
+
+
+Sheet "Azure" has the steps and commands followed in Azure.
+
+
 https://docs.google.com/spreadsheets/d/1a-i5N9MtxRWyhSBlCvmqUK_TV9Ea-E_V/edit?usp=sharing&ouid=117556559172603166026&rtpof=true&sd=true
 
 
@@ -42,9 +48,6 @@ Steps for Avito project in GCP is here:
 https://github.com/priyakrishnan-de/data-eng/blob/main/gcp/readme.md
 
 
-Sheet "GCP" has the steps and commands followed in GCP.
-https://docs.google.com/spreadsheets/d/1a-i5N9MtxRWyhSBlCvmqUK_TV9Ea-E_V/edit?usp=sharing&ouid=117556559172603166026&rtpof=true&sd=true&param=1
-
 
 
 ## **Azure - Avito context project**
@@ -53,9 +56,6 @@ Steps for Avito project in Azure is here:
 
 https://github.com/priyakrishnan-de/data-eng/blob/main/azure/readme.md
 
-
-Sheet "Azure" has the steps and commands followed in Azure.
-https://docs.google.com/spreadsheets/d/1a-i5N9MtxRWyhSBlCvmqUK_TV9Ea-E_V/edit?usp=sharing&ouid=117556559172603166026&rtpof=true&sd=true
 
 
 
