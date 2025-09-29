@@ -1,8 +1,5 @@
 #folder to be ignored
-.terraform/
-.terraform.lock.hcl
-terrform.tfstate
-terraform.tfstate.backup
+terraform/
 
 #All JSON files, public and private keys to be ignored
 *.json
