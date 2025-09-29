@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vm-proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vm-proxy
+  template:
+    metadata:
+      labels:
+        app: vm-proxy
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        ports:
+        - containerPort: 80

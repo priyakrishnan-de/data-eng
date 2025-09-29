@@ -54,7 +54,7 @@ if __name__ == "__main__":
                 COUNT(*) AS impressions,
                 COUNT(*) FILTER (WHERE ts."IsClick" = 1) AS clicks,
                 (COUNT(*) FILTER (WHERE ts."IsClick" = 1)::float / NULLIF(COUNT(*), 0)) AS ctr
-            FROM "TrainSearchstream_Silver" ts
+            FROM "TrainSearchStream_Silver" ts
             GROUP BY ts."AdID", ts."UserID", day
         ) c
         LEFT JOIN (
@@ -82,7 +82,7 @@ if __name__ == "__main__":
             SUM(CASE WHEN pr."AdID" IS NOT NULL OR vs."UserID" IS NOT NULL THEN 1 ELSE 0 END) AS conversions,
             ROUND(SUM(CASE WHEN ts."IsClick" = 1 THEN 1 ELSE 0 END)::numeric / NULLIF(COUNT(ts."AdID"),0), 4) AS ctr,
             ROUND(SUM(CASE WHEN pr."AdID" IS NOT NULL OR vs."UserID" IS NOT NULL THEN 1 ELSE 0 END)::numeric / NULLIF(COUNT(ts."AdID"),0), 4) AS conversion_rate
-        FROM "TrainSearchstream_Silver" ts
+        FROM "TrainSearchStream_Silver" ts
         LEFT JOIN "PhoneRequestsStream" pr ON ts."UserID" = pr."UserID" AND ts."AdID" = pr."AdID"
         LEFT JOIN "VisitsStream" vs ON ts."UserID" = vs."UserID"
         GROUP BY ts."AdID", ts."Title", ts."Ad_Type"
@@ -101,7 +101,7 @@ if __name__ == "__main__":
             SUM(CASE WHEN pr."AdID" IS NOT NULL OR vs."UserID" IS NOT NULL THEN 1 ELSE 0 END) AS conversions,
             ROUND(SUM(CASE WHEN ts."IsClick" = 1 THEN 1 ELSE 0 END)::numeric / NULLIF(COUNT(ts."AdID"),0), 4) AS ctr,
             ROUND(SUM(CASE WHEN pr."AdID" IS NOT NULL OR vs."UserID" IS NOT NULL THEN 1 ELSE 0 END)::numeric / NULLIF(COUNT(ts."AdID"),0), 4) AS conversion_rate
-        FROM "TrainSearchstream_Silver" ts
+        FROM "TrainSearchStream_Silver" ts
         LEFT JOIN "PhoneRequestsStream" pr ON ts."UserID" = pr."UserID" AND ts."AdID" = pr."AdID"
         LEFT JOIN "VisitsStream" vs ON ts."UserID" = vs."UserID"
         GROUP BY ts."AdID", ts."Title", ts."Ad_Type"

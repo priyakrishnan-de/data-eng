@@ -46,54 +46,60 @@ with DAG(
     # This is the fastest and most efficient method for large files.
     # We use a raw connection to leverage PostgreSQL's COPY command.
     # ====================================================================
+    
     @task(task_id="ingest_large_tsv_files_with_copy")
     def ingest_large_tsv_files_with_copy():
-        """
-        Ingests large TSV files into PostgreSQL using the COPY command.
-        This is a highly optimized method for bulk ingestion.
-        """
+        import logging
         gcs_hook = GCSHook()
         pg_hook = PostgresHook(postgres_conn_id=POSTGRES_CONN_ID)
-        
+
         files_to_tables = {
-            "testSearchStream.tsv": "TestSearchStream",
-            "PhoneRequestsStream.tsv": "PhoneRequestsStream",
-            "AdsInfo.tsv": "AdsInfo",
-            "VisitsStream.tsv": "VisitsStream",
-            "SearchInfo.tsv": "SearchInfo",
-            "Category.tsv": "Category",
-            "Location.tsv": "Location",
-            "UserInfo.tsv": "UserInfo",
+            #"Category.tsv": "Category",
+            #"Location.tsv": "Location",
+            #"UserInfo.tsv": "UserInfo",
+            #"testSearchStream.tsv": "TestSearchStream",
+            #"SearchInfo.tsv": "SearchInfo",
+            #"AdsInfo.tsv": "AdsInfo",
+            #"PhoneRequestsStream.tsv": "PhoneRequestsStream",
+            "VisitsStream.tsv": "VisitsStream"
         }
-        
+
         for file, table in files_to_tables.items():
-            print(f"Loading {file} -> {table}...")
-            
-            # Use a temporary file to avoid loading the whole file into memory
+            logging.info(f"Loading {file} -> {table}...")
+
             with tempfile.NamedTemporaryFile(mode="wb", delete=False) as temp_file:
                 gcs_hook.download(
                     bucket_name=GCS_BUCKET_NAME,
                     object_name=file,
                     filename=temp_file.name
                 )
+
+            # --- Build schema only if table is new ---
+            conn = pg_hook.get_conn()   # psycopg2 connection
             
-            # Now, open the same temporary file in text mode for reading
-            with open(temp_file.name, mode='r') as read_file:
-                # Use pandas to infer the schema from the header only
-                df = pd.read_csv(read_file, sep="\t", nrows=0)
-                # Create the table with inferred dtypes
-                df.to_sql(table, pg_hook.get_sqlalchemy_engine(), if_exists="replace", index=False, schema="public")
-                
-                # Rewind the file again before the COPY operation
-                read_file.seek(0)
-                
-                # Use the COPY command to load data directly from the temporary file
-                with pg_hook.get_conn() as conn:
-                    with conn.cursor() as cur:
-                        cur.copy_expert(f'COPY "{table}" FROM STDIN WITH CSV DELIMITER E\'\t\' HEADER', read_file)
-                    conn.commit()
-            
-            print(f"Data from {file} has been ingested into the {table} table.")
+            #engine = pg_hook.get_sqlalchemy_engine()
+
+            #with open(temp_file.name, mode="r") as f_header:
+            #    df = pd.read_csv(f_header, sep="\t", nrows=0)
+            #    df.to_sql(table.lower(), engine,if_exists="append",index=False,schema="public")
+
+            # --- Bulk load ---            
+            cur = conn.cursor()
+            with open(temp_file.name, mode="r") as f_data:
+                cur.copy_expert(
+                    f'COPY "{table}" FROM STDIN WITH CSV DELIMITER E\'\t\' HEADER',
+                    f_data
+                )
+                conn.commit()
+
+            cur.close()
+            conn.close()
+
+            os.remove(temp_file.name)
+            logging.info(f"✅ {file} ingested into {table}")
+
+        return "Ingestion complete."
+
 
     large_tsv = ingest_large_tsv_files_with_copy()
     large_tsv

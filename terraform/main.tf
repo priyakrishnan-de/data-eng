@@ -1,4 +1,3 @@
-
 terraform {
   required_providers {
     google = {
@@ -8,101 +7,88 @@ terraform {
   }
 }
 
-
 provider "google" {
   # Configuration options
-  credentials = file(var.credentials)
-  project     = var.project
-  region      = var.location
+  credentials = "../../../key-petal-471015-g3-9c54a8030d5e.json"
+  project     = "key-petal-471015-g3"
+  region      = "asia-east1"
 }
 
-/*
-resource "google_storage_bucket" "priya_bucket" {
-  name          = var.gcs_bucket_name
-  location      = var.location
-  storage_class = var.gcs_storage_class
-  uniform_bucket_level_access = true
+
+resource "google_compute_network" "main_vpc" {
+  name = "private-vpc"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "main_subnet" {
+  name          = "private-subnet"
+  ip_cidr_range = "10.10.0.0/16"
+  region        = "asia-east1"
+  network       = google_compute_network.main_vpc.id
+  private_ip_google_access = true
+}
+
+resource "google_compute_instance" "compute" {
+  count        = 3
+  name         = "compute-vm-${count.index}"
+  machine_type = "e2-micro"
+  zone         = "asia-east1-c"
+
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-11"
+    }
+  }
+
+  network_interface {
+    subnetwork         = google_compute_subnetwork.main_subnet.name
+    #access config commented to remove external IP and can be connected only privately 
+    #access_config {}
+  }
+
+  metadata_startup_script = <<-EOT
+    #!/bin/bash
+    apt-get update
+    apt-get install -y apache2
+    echo "Hello from VM-${count.index}" > /var/www/html/index.html
+    systemctl restart apache2
+  EOT
+}
+
+resource "google_container_cluster" "gke_cluster" {
+  name       = "private-gke-cluster"
+  location   = "asia-east1"
+  network    = google_compute_network.main_vpc.name
+  subnetwork = google_compute_subnetwork.main_subnet.name
+
+  networking_mode = "VPC_NATIVE"
+  remove_default_node_pool = true
+  initial_node_count = 1
+
+  deletion_protection = false
+
+  private_cluster_config {
+    enable_private_nodes    = true
+    enable_private_endpoint = false
+    master_ipv4_cidr_block  = "172.16.0.0/28"
+  }
+
+  ip_allocation_policy {}
+}
+
+resource "google_container_node_pool" "default_nodes" {
+  name       = "default-pool"
+  cluster    = google_container_cluster.gke_cluster.name
+  location   = google_container_cluster.gke_cluster.location
   
-  lifecycle_rule {
-    condition {
-      age = 3
-    }
-    action {
-      type = "AbortIncompleteMultipartUpload"
-    }
+  node_count = 1
+
+  node_config {
+    machine_type = "e2-small"
+    oauth_scopes = ["https://www.googleapis.com/auth/cloud-platform"]
+    #network_tags = ["gke-nodes"]
   }
 }
-
-
-resource "google_bigquery_dataset" "priya_dataset" {
-  dataset_id  = var.bq_dataset_name
-  location    = var.location
-  description = "Dataset for GCP Training"
-}
-*/
-
-resource "google_cloud_run_service" "service" {
-  name     = var.cloud_run_service_name
-  location = var.location
-  project  = var.project
-
-  template {
-    spec {
-      containers {
-        image = "asia.gcr.io/key-petal-471015-g3/data-export-service"   # replace with your container image
-        resources {
-          limits = {
-            memory = "256Mi"
-          }
-        }
-
-        # optional env vars
-        # env {
-        #   name  = "ENV"
-        #   value = "dev"
-        # }
-      }
-
-      container_concurrency = 80
-    }
-  }
-
-  traffic {
-    percent         = 100
-    latest_revision = true
-  }
-}
-
-
-resource "google_cloud_scheduler_job" "call_cloudrun" {
-  name        = "trigger-cloudrun"
-  description = "Trigger Cloud Run from Cloud Scheduler"
-  schedule    = "*/5 * * * *"   # every 5 minutes (cron format)
-  time_zone   = "Asia/Kolkata"
-
-  http_target {
-    http_method = "GET"
-    uri         = google_cloud_run_service.service.status[0].url
-    oidc_token {
-      service_account_email = google_service_account.scheduler_sa.email
-    }
-  }
-}
-
-resource "google_service_account" "scheduler_sa" {
-  account_id   = "scheduler-invoker"
-  display_name = "Scheduler Invoker"
-}
-
-# Give Scheduler permission to invoke Cloud Run
-resource "google_cloud_run_service_iam_member" "invoker" {
-  location = google_cloud_run_service.service.location
-  project  = var.project
-  service  = google_cloud_run_service.service.name
-  role     = "roles/run.invoker"
-  member   = "serviceAccount:${google_service_account.scheduler_sa.email}"
-}
-
 
 
 

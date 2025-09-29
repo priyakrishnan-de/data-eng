@@ -48,7 +48,7 @@ def main():
     print("Reading data from bronze layer tables...")
     
     # Read the small tables normally
-    staging_df = spark.read.jdbc(url=jdbc_url, table='"TrainSearchstream_Staging"', properties=properties)
+    staging_df = spark.read.jdbc(url=jdbc_url, table='"TrainSearchStream_Staging"', properties=properties)
     category_df = spark.read.jdbc(url=jdbc_url, table='"Category"', properties=properties)
     location_df = spark.read.jdbc(url=jdbc_url, table='"Location"', properties=properties)
     
@@ -143,11 +143,11 @@ def main():
     # ------------------------------------
     print("Writing data to the silver layer...")
   
-    print(f"Silver data as follows: {silver_df}")
+    #print(f"Silver data as follows: {silver_df}")
 
     silver_df.write \
         .mode("overwrite") \
-        .jdbc(url=jdbc_url, table='"TrainSearchstream_Silver"', properties=properties)
+        .jdbc(url=jdbc_url, table='"TrainSearchStream_Silver"', properties=properties)
 
     print("Pipeline completed successfully!")
     

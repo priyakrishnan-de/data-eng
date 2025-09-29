@@ -21,7 +21,7 @@ GCS_BUCKET_NAME = "avito-raw"
 
 
 with DAG(
-    dag_id="avito_data_ingestion_pipeline",
+    dag_id="avito_rawdata_2_ingestion_pipeline",
     start_date=datetime.datetime(2025, 9, 3),
     schedule_interval=None,
     catchup=False,
@@ -55,9 +55,12 @@ with DAG(
         files_to_tables = {
             #"testSearchStream.tsv": "TestSearchStream",
             #"PhoneRequestsStream.tsv": "PhoneRequestsStream",
-            "AdsInfo.tsv": "AdsInfo",
+            #"AdsInfo.tsv": "AdsInfo",
             #"VisitsStream.tsv": "VisitsStream",
             #"SearchInfo.tsv": "SearchInfo",
+            "Category.tsv": "Category",
+            "Location.tsv": "Location",
+            "UserInfo.tsv": "UserInfo",
         }
         
         for file, table in files_to_tables.items():

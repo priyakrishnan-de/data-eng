@@ -16,11 +16,11 @@ import datetime
 POSTGRES_CONN_ID = "cloudsql_postgres_conn"
 
 with DAG(
-    dag_id="gcp_localairflow_simulate_trainsearchstream",
+    dag_id="gcp_dag_simulate_trainsearchstream",
     start_date=datetime.datetime(2025, 9, 3),
     schedule_interval=None,
     catchup=False,
-    tags=["data-simulation-trainsearchstream", "postgres", "local_airflow_to_gcp"],
+    tags=["data-simulation-trainsearchstream", "postgres", "vm_airflow_to_cloudsql"],
 ) as dag:
 
     # ====================================================================
