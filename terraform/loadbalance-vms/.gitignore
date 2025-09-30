@@ -1,5 +1,6 @@
 #folder to be ignored
-terraform/
+.terraform.tfstate.lock.info
+terraform.tfstate
 
 #All JSON files, public and private keys to be ignored
 *.json
