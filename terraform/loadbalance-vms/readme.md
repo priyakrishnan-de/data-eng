@@ -92,7 +92,9 @@ flowchart TB
 1. Verify Kubernetes resources:
 
     `kubectl get deployments`
+
     `kubectl get pods`
+
     `kubectl get svc`
 
 2. Verify nodes:
@@ -126,14 +128,19 @@ flowchart TB
 
     a. Enter into bash:
 
-    `kubectl run curl-test --rm -it --image=alpine --restart=Never -- sh`
+    `kubectl run curl-test --rm -it --image=alpine/curl --restart=Never -- sh`
+
+    In case earlier pod is still remaining from previous session, delete it first and then enter bash:
+
+    `kubectl delete pod curl-test`
 
     b. Inside pod, check if LB is working and round robin message received from the 3 VM's:
 
-    `apk add --no-cache curl
-    curl http://<INTERNAL_LB_IP>`
+    `curl http://<INTERNAL_LB_IP>`
 
-    c. If LB is not working, check directly if VM is responding:
+    If welcome to nginx is displayed, it means ILB + Kubernetes + proxy pod are working fine. But nginx is not able to reach the VM's.
+
+    c. If LB is not working, check directly if VM is responding within bash:
 
     `curl http://<VM 1 IP>
     curl http://<VM 2 IP>
@@ -141,10 +148,32 @@ flowchart TB
 
     (or)
 
-    c. SSH into one VM and check if it returns Hello message:
+    c. SSH into one VM and check if it returns Hello message from PowerShell:
 
     `gcloud compute ssh compute-vm-0 --tunnel-through-iap --zone=asia-east1-c`
+
+    Ping the server (localhost) from within:
     `curl localhost`
+
+    d. If server is not up, manually update and restart VM:
+
+    `sudo apt-get update -y
+    sudo apt-get install -y apache2
+    echo "Hello from compute-vm-0" | sudo tee /var/www/html/index.html
+    sudo systemctl restart apache2`
+
+    Then check if it is listening on port 80:
+    `sudo ss -tlnp | grep 80`
+
+    e. If it does not return anything, it means it is still not listening.
+
+    If VM does not have Apache installed even after manual update, it does not have access to get updates from internet. So need to allow for getting updates using NAT config /egress. Include the NAT router and config in main.tf and apply it.
+
+    f. Manually update and restart VM now
+
+    g. Check if listening on 80
+
+    h. Repeat the same step for each VM and ensure they are listening on port 80
 
 
 2. If VM's are responding, Check proxy pod logs if there are issues with ILB reaching VM's:
@@ -154,7 +183,7 @@ flowchart TB
 
 3. Check if firewall rule was created for GKE prod to reach VM's on port 80:
 
-    gcloud compute firewall-rules list --filter="network=private-vpc"
+    `gcloud compute firewall-rules list --filter="network=private-vpc"`
 
 4. If Firewall rule not available, To create firewall rule for allowing requests from Secondary CIDR (services) to VM's on port 80:
 
@@ -165,11 +194,13 @@ flowchart TB
 
     Verify tag:
 
-    `gcloud compute instances describe backend-vm-0 --format="get(tags.items)"`
+    `gcloud compute instances describe compute-vm-0 --format="get(tags.items) --zone="asia-east1-c"`
 
     Update tag:
 
-    gcloud compute instances add-tags backend-vm-0 --tags=backend-vms
+    `gcloud compute instances add-tags compute-vm-0 --tags=backend-vms`
+    `gcloud compute instances add-tags compute-vm-1 --tags=backend-vms`
+    `gcloud compute instances add-tags compute-vm-2 --tags=backend-vms`
 
 
 6. To resize the clusters and make the number of nodes as zero:
