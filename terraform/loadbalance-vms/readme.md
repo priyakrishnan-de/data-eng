@@ -77,6 +77,10 @@ flowchart TB
     configmap.yaml - Configuration for three VM's listening on port 80
 
 
+6. To Deploy the Loadbalancer, provide path where the yaml files are    available:
+
+    `kubectl apply -f C:/Users/OrCon/GitHub/data-eng/k8s/lb/`
+
 
 
 **Steps followed for verification of resources - Google Cloud SDK**
@@ -104,10 +108,17 @@ flowchart TB
 
     `kubectl get svc vm-proxy`
 
-6. Describe LB :
+6. Describe LB:
 
     `kubectl describe svc vm-proxy`
 
+7. To check config map:
+
+    `kubectl describe configmap vm-proxy-conf`
+
+    If ConfigMap is updated, delete and restart the proxy pod:
+
+    `kubectl delete pod -l app=vm-proxy`
 
 
 ### Troubleshooting:
@@ -162,30 +173,6 @@ flowchart TB
     gcloud compute instances add-tags backend-vm-0 --tags=backend-vms
 
 
-6. To check config map:
-
-    `kubectl describe configmap vm-proxy-conf`
-
-    If ConfigMap is updated, delete and restart the proxy pod:
-
-    `kubectl delete pod -l app=vm-proxy`
-
-
-7. To Deploy the Loadbalancer, provide path where the yaml files are availavle:
-
-    `kubectl apply -f C:/Users/OrCon/GitHub/data-eng/k8s/lb/`
-
-
-8. To resize the clusters and make the number of nodes as zero:
+6. To resize the clusters and make the number of nodes as zero:
 
     `gcloud container clusters resize private-gke-cluster --num-nodes=0 --region=asia-east1`
-
-
-
-
-
-
-
-
-
-

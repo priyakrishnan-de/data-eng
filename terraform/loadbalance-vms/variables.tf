@@ -70,13 +70,13 @@ variable "gke_cluster_name" {
 variable "gke_node_count" {
   description = "Number of nodes in the GKE node pool"
   type        = number
-  default     = 3
+  default     = 1
 }
 
 variable "gke_machine_type" {
   description = "Machine type for GKE nodes"
   type        = string
-  default     = "e2-small"
+  default     = "e2-micro"
 }
 
 ############################

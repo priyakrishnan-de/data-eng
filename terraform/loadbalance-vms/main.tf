@@ -148,7 +148,7 @@ resource "google_container_node_pool" "default_nodes" {
   #node_count = 1
 
   node_config {
-    machine_type = "e2-small"
+    machine_type = "e2-micro"
     oauth_scopes = ["https://www.googleapis.com/auth/cloud-platform"]
     tags = ["gke-nodes"]
   }
