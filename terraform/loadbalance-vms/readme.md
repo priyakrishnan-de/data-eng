@@ -82,37 +82,36 @@ flowchart TB
     `kubectl apply -f C:/Users/OrCon/GitHub/data-eng/k8s/lb/`
 
 
-
-**Steps followed for verification of resources - Google Cloud SDK**
-
-1. Verify if cluster was created:
+7. Updates kubeconfig file with credentials and endpoint to point to kubectl at a specific cluster in GKE.
 
     `gcloud container clusters get-credentials private-gke-cluster --region=asia-east1`
 
 
-2. Verify Kubernetes resources:
+**Steps followed for verification of resources - Google Cloud SDK**
+
+1. Verify Kubernetes resources:
 
     `kubectl get deployments`
     `kubectl get pods`
     `kubectl get svc`
 
-3. Verify nodes:
+2. Verify nodes:
 
     `kubectl get nodes`
 
-4. Get more details on a node:
+3. Get more details on a node:
 
     `kubectl describe node <node-name>`
 
-5. Confirm LB and Status:
+4. Confirm LB and Status:
 
     `kubectl get svc vm-proxy`
 
-6. Describe LB:
+5. Describe LB:
 
     `kubectl describe svc vm-proxy`
 
-7. To check config map:
+6. To check config map:
 
     `kubectl describe configmap vm-proxy-conf`
 
