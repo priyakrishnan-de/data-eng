@@ -77,14 +77,31 @@ flowchart TB
     configmap.yaml - Configuration for three VM's listening on port 80
 
 
-6. To Deploy the Loadbalancer, provide path where the yaml files are    available:
+6. Updates kubeconfig file with credentials and endpoint to point to kubectl at a specific cluster in GKE.
+
+    `gcloud container clusters get-credentials private-gke-cluster --region=asia-east1`
+
+7. To Deploy the Loadbalancer, provide path where the service, deploymet, configmap yaml files are available:
 
     `kubectl apply -f C:/Users/OrCon/GitHub/data-eng/k8s/lb/`
 
 
-7. Updates kubeconfig file with credentials and endpoint to point to kubectl at a specific cluster in GKE.
+8. Test if load balancer is working inside GKE:
 
-    `gcloud container clusters get-credentials private-gke-cluster --region=asia-east1`
+    a. Enter into bash:
+
+    `kubectl run curl-test --rm -it --image=alpine/curl --restart=Never -- sh`
+
+    In case earlier pod is still remaining from previous session, delete it first and then enter bash:
+
+    `kubectl delete pod curl-test`
+
+    b. Inside pod, check if LB is working and round robin message received from the 3 VM's:
+
+    `curl http://<INTERNAL_LB_IP>`
+
+    Expected to get hello message from 3 VM's. 
+
 
 
 **Steps followed for verification of resources - Google Cloud SDK**
@@ -124,21 +141,7 @@ flowchart TB
 
 ### Troubleshooting:
 
-1. Test if load balancer is working inside GKE:
-
-    a. Enter into bash:
-
-    `kubectl run curl-test --rm -it --image=alpine/curl --restart=Never -- sh`
-
-    In case earlier pod is still remaining from previous session, delete it first and then enter bash:
-
-    `kubectl delete pod curl-test`
-
-    b. Inside pod, check if LB is working and round robin message received from the 3 VM's:
-
-    `curl http://<INTERNAL_LB_IP>`
-
-    Expected to get hello message from 3 VM's. Instead if welcome to nginx is displayed, it means ILB + Kubernetes + proxy pod are working fine. But nginx is not able to reach the VM's.
+1. If Hello msg from 3 VM's is not displayed from ILB and instead if welcome to nginx is displayed, it means ILB + Kubernetes + proxy pod are working fine. But nginx is not able to reach the VM's.
 
     c. If LB is not working, check directly if VM is responding within bash:
 
