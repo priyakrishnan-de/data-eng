@@ -15,7 +15,7 @@ flowchart TB
     subgraph GKE["Private GKE Cluster"]
         direction TB
         ControlPlane["GKE Control Plane (Managed by Google)"]
-        NodePool["Node Pool (e2-small nodes) Private IPs"]
+        NodePool["Node Pool (e2-micro nodes) Private IPs"]
         ILB["Internal Load Balancer (GKE Service Type as LoadBalancer)"]
 
         ControlPlane --> NodePool
@@ -47,7 +47,7 @@ flowchart TB
 
 
 ### Steps followed for creating terraform files - from local
-1. Create main.tf and create resources one by one at every step using validate terraform plan, terraform apply
+1. Create main.tf and create resources one by one at every step using terraform validate, terraform plan, terraform apply
 
 2. Create output.tf to output the resource detail at every step as applicable
 
@@ -138,7 +138,7 @@ flowchart TB
 
     `curl http://<INTERNAL_LB_IP>`
 
-    If welcome to nginx is displayed, it means ILB + Kubernetes + proxy pod are working fine. But nginx is not able to reach the VM's.
+    Expected to get hello message from 3 VM's. Instead if welcome to nginx is displayed, it means ILB + Kubernetes + proxy pod are working fine. But nginx is not able to reach the VM's.
 
     c. If LB is not working, check directly if VM is responding within bash:
 
@@ -157,10 +157,13 @@ flowchart TB
 
     d. If server is not up, manually update and restart VM:
 
-    `sudo apt-get update -y
-    sudo apt-get install -y apache2
-    echo "Hello from compute-vm-0" | sudo tee /var/www/html/index.html
-    sudo systemctl restart apache2`
+    `sudo apt-get update -y`
+    
+    `sudo apt-get install -y apache2`
+    
+    `echo "Hello from compute-vm-0" | sudo tee /var/www/html/index.html`
+    
+    `sudo systemctl restart apache2`
 
     Then check if it is listening on port 80:
     `sudo ss -tlnp | grep 80`
@@ -169,11 +172,35 @@ flowchart TB
 
     If VM does not have Apache installed even after manual update, it does not have access to get updates from internet. So need to allow for getting updates using NAT config /egress. Include the NAT router and config in main.tf and apply it.
 
-    f. Manually update and restart VM now
+    f. Manually update and restart VM after NAT config and check if VM is listening on 80
 
-    g. Check if listening on 80
+    g. Repeat the same step for other two VM's and ensure they are listening on port 80 using either ssh or bash with curl
 
-    h. Repeat the same step for each VM and ensure they are listening on port 80
+        Second VM:
+        `gcloud compute ssh compute-vm-1 --tunnel-through-iap --zone=asia-east1-c`
+
+        `sudo apt-get update -y`
+        
+        `sudo apt-get install -y apache2` 
+        
+        `echo "Hello from compute-vm-1" | sudo tee /var/www/html/index.html` 
+        
+        `sudo systemctl restart apache2`
+
+        `sudo ss -tlnp | grep 80`
+
+        Third VM:
+        `gcloud compute ssh compute-vm-2 --tunnel-through-iap --zone=asia-east1-c`
+
+        `sudo apt-get update -y`
+        
+        `sudo apt-get install -y apache2` 
+        
+        `echo "Hello from compute-vm-2" | sudo tee /var/www/html/index.html` 
+        
+        `sudo systemctl restart apache2`
+
+        `sudo ss -tlnp | grep 80`
 
 
 2. If VM's are responding, Check proxy pod logs if there are issues with ILB reaching VM's:
