@@ -106,7 +106,16 @@ flowchart TB
 
 **Steps followed for verification of resources - Google Cloud SDK**
 
-1. Verify Kubernetes resources:
+1. Verify the createc cluster:
+
+`gcloud container clusters describe private-gke-cluster --region=asia-east1 --format="value(ipAllocationPolicy.clusterIpv4CidrBlock)"`
+
+2. Verify the compute instances:
+
+`gcloud compute instances describe compute-vm-0 --zone=asia-east1-c --format="get(networkInterfaces[0].accessConfigs)"`
+
+
+3. Verify Kubernetes resources:
 
     `kubectl get deployments`
 
@@ -114,23 +123,23 @@ flowchart TB
 
     `kubectl get svc`
 
-2. Verify nodes:
+4. Verify nodes:
 
     `kubectl get nodes`
 
-3. Get more details on a node:
+5. Get more details on a node:
 
     `kubectl describe node <node-name>`
 
-4. Confirm LB and Status:
+6. Confirm LB and Status:
 
     `kubectl get svc vm-proxy`
 
-5. Describe LB:
+7. Describe LB:
 
     `kubectl describe svc vm-proxy`
 
-6. To check config map:
+8. To check config map:
 
     `kubectl describe configmap vm-proxy-conf`
 
